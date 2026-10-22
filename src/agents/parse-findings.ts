@@ -1,3 +1,7 @@
+/**
+ * 모델이 준 문자열에서 findings JSON만 꺼낸다.
+ * 요청한 카테고리가 아니거나 줄 범위가 뒤집힌 항목은 버린다.
+ */
 import { ZodError } from "zod";
 import { agentResponseSchema, reviewFindingSchema, type FindingCategory, type ReviewFinding } from "../schemas/review-finding.schema.js";
 import { AppError } from "../utils/app-error.js";

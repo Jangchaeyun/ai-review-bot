@@ -1,3 +1,4 @@
+/** LLM 일시 오류만 재시도하고, 인증 실패는 다시 호출하지 않는지 확인한다. */
 import { describe, expect, it } from "vitest";
 import { createOpenAiCompatibleProvider } from "../../src/integrations/llm/openai-provider.js";
 import { AppError } from "../../src/utils/app-error.js";

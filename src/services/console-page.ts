@@ -1,3 +1,7 @@
+/**
+ * 브라우저 콘솔 한 페이지. 로그인 없이 리뷰를 요청하므로 이 포트를 공개 인터넷에 열면 안 된다.
+ * 최근 카드는 같은 Pull Request의 최신 작업만 보여주고, 지적 본문은 저장하지 않는다.
+ */
 export const CONSOLE_PAGE = `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -158,6 +162,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
     <div id="jobs" aria-live="polite"></div>
   </main>
   <script>
+    // 서버가 준 작업 기록만 그린다. 주소와 제목은 textContent로 넣어 HTML로 해석하지 않는다.
     const form = document.querySelector("#review-form");
     const input = document.querySelector("#pull-request-url");
     const result = document.querySelector("#result");

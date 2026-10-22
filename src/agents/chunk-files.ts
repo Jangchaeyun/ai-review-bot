@@ -1,3 +1,7 @@
+/**
+ * 토큰 예산을 넘는 diff를 에이전트 호출 단위로 나눈다.
+ * 파일 하나만 예산을 넘겨도 그 파일은 그대로 한 청크에 둔다.
+ */
 import type { ReviewFile } from "./filter-findings.js";
 
 export function chunkReviewFiles(files: readonly ReviewFile[], maxChars: number): ReviewFile[][] {

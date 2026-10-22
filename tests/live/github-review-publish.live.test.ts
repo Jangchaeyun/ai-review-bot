@@ -1,3 +1,4 @@
+/** 실제 GitHub에 댓글을 남기는 수동 테스트다. GITHUB_LIVE_REVIEW=1일 때만 실행한다. */
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { createReviewPublisher } from "../../src/integrations/github/review-publisher.js";

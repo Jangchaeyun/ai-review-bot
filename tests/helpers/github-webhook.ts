@@ -1,3 +1,4 @@
+/** 테스트가 수신 바이트 기준으로 GitHub 서명을 만든다. */
 import { createHmac } from "node:crypto";
 import type { Express } from "express";
 import request from "supertest";

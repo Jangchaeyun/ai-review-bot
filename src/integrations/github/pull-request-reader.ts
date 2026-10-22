@@ -1,3 +1,7 @@
+/**
+ * 설치 토큰으로 Pull Request 메타데이터와 diff를 읽는다.
+ * 응답의 URL을 따라가지 않고, diff 본문은 로그에 남기지 않는다.
+ */
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";
 import type { Logger } from "pino";

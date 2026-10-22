@@ -1,3 +1,6 @@
+/**
+ * 프로세스 환경변수를 Env로 좁힌다. 실패 메시지에는 어떤 키가 빠졌는지만 적고 값은 적지 않는다.
+ */
 import type { ZodError } from "zod";
 import { envSchema, type Env } from "../schemas/env.schema.js";
 import { AppError } from "../utils/app-error.js";

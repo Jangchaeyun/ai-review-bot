@@ -1,3 +1,7 @@
+/**
+ * GitHub fetch에 타임아웃과 재시도를 붙인다.
+ * 429, 502, 503, 504와 네트워크 타임아웃만 최대 3회, Retry-After가 있으면 그 시간을 따른다.
+ */
 import { AppError } from "../../utils/app-error.js";
 
 export type FetchLike = typeof fetch;

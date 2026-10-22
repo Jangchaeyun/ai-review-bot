@@ -1,3 +1,6 @@
+/**
+ * 작업 기록에 남기는 짧은 리뷰 결과. 본문, 근거, 제안은 저장하지 않는다.
+ */
 import { z } from "zod";
 import { SEVERITIES, type Severity } from "../schemas/review-finding.schema.js";
 

@@ -1,3 +1,4 @@
+/** 설치 토큰 권한과, diff를 로그에 남기지 않는지를 확인한다. */
 import { generateKeyPairSync } from "node:crypto";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";

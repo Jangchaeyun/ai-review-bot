@@ -1,3 +1,4 @@
+/** 환경변수 누락과 잘못된 값이 값 자체를 오류 문장에 남기지 않는지 확인한다. */
 import { describe, expect, it } from "vitest";
 import { parseEnv } from "../../src/services/load-env.js";
 import { AppError } from "../../src/utils/app-error.js";

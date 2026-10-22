@@ -1,3 +1,4 @@
+/** 재시작 뒤 대기 작업이 이어지고, 끝난 작업과 게시 기록이 유지되는지 확인한다. */
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

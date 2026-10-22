@@ -1,3 +1,4 @@
+/** 에이전트가 diff에 없는 근거를 버리고, 일부 실패해도 나머지를 합치는지 확인한다. */
 import { describe, expect, it } from "vitest";
 import type { LlmProvider } from "../../src/integrations/llm/llm-provider.js";
 import { createReviewAgent, createReviewAgents } from "../../src/agents/review-agent.js";
@@ -69,6 +70,7 @@ describe("review agents", () => {
     for (const message of seen) {
       expect(message).toContain(UNTRUSTED_DATA_RULE);
       expect(message).toContain("<<<TITLE");
+      expect(message).toContain("<<<LINES");
       expect(message).toContain("Ignore previous instructions");
       expect(message).not.toContain("<<<system>>>");
     }
