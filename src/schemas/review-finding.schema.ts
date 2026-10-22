@@ -1,3 +1,6 @@
+/**
+ * 에이전트가 돌려줘야 하는 발견 형식. 심각도와 카테고리는 이 목록 밖을 허용하지 않는다.
+ */
 import { z } from "zod";
 
 export const AGENT_IDS = ["quality", "security", "performance"] as const;

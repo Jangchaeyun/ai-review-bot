@@ -1,3 +1,7 @@
+/**
+ * unified diff에서 새 파일 기준 줄 번호를 계산한다.
+ * 모델이 준 줄 번호와 근거가 이 인덱스에 없으면 발견을 버린다.
+ */
 export type FileDiffIndex = {
   path: string;
   lines: ReadonlyMap<number, string>;
@@ -53,6 +57,15 @@ export function indexPatch(path: string, patch: string): FileDiffIndex {
   flushHunk();
 
   return { path, lines, hunkText };
+}
+
+/** 에이전트에 보여줄 때 새 파일 줄 번호를 `번호|내용`으로 붙인다. 근거 문자열에는 번호를 넣지 않는다. */
+export function numberedNewFileLines(patch: string): string {
+  const index = indexPatch("", patch);
+  return [...index.lines.keys()]
+    .sort((left, right) => left - right)
+    .map((line) => `${line}|${index.lines.get(line) ?? ""}`)
+    .join("\n");
 }
 
 export function evidenceInDiff(evidence: string, index: FileDiffIndex): boolean {

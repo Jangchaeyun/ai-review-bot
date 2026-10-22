@@ -1,3 +1,6 @@
+/**
+ * 에이전트가 의존하는 LLM 경계. 공급자별 차이는 이 인터페이스 뒤에 둔다.
+ */
 export type LlmMessage = {
   role: "system" | "user";
   content: string;

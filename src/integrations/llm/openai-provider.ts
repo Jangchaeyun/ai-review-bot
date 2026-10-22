@@ -1,3 +1,7 @@
+/**
+ * OpenAI 호환 Chat Completions 호출. 에이전트는 이 구현이 아니라 LlmProvider만 의존한다.
+ * 일시 오류만 재시도하고, 인증 실패와 권한 부족은 다시 호출하지 않는다.
+ */
 import { z, ZodError } from "zod";
 import { AppError } from "../../utils/app-error.js";
 import type { LlmCompletion, LlmCompletionRequest, LlmProvider } from "./llm-provider.js";

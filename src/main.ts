@@ -1,3 +1,7 @@
+/**
+ * 프로세스 시작점이다. 환경변수를 읽고 서버를 연 뒤, 종료 신호에서는 진행 중인 리뷰가 끝날 때까지 기다린다.
+ * 테스트는 이 파일을 실행하지 않고 createApp만 사용한다.
+ */
 import { createApp } from "./app.js";
 import { loadDotEnv } from "./services/load-dotenv.js";
 import { parseEnv } from "./services/load-env.js";
@@ -5,6 +9,7 @@ import { createReviewRuntime } from "./services/review-pipeline.js";
 import type { Env } from "./schemas/env.schema.js";
 import { createLogger } from "./utils/logger.js";
 
+/** 필수 환경변수가 없으면 값을 로그에 남기지 않고 프로세스를 끝낸다. */
 function readEnv(): Env {
   try {
     loadDotEnv();
@@ -33,6 +38,7 @@ function main(): void {
   });
 
   let stopping = false;
+  // 같은 신호가 두 번 와도 close를 한 번만 호출한다.
   const shutdown = (signal: NodeJS.Signals): void => {
     if (stopping) {
       return;

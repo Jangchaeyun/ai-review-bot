@@ -1,3 +1,4 @@
+/** 처리 건수와 실패율 계산을 확인한다. */
 import { describe, expect, it } from "vitest";
 import { InMemoryReviewMetrics } from "../../src/services/review-metrics.js";
 

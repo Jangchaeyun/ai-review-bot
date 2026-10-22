@@ -1,3 +1,7 @@
+/**
+ * 구조화 로그를 만든다. 비밀로 쓰는 필드 이름은 [Redacted]로 가린다.
+ * 환경변수 객체 전체는 base에 넣지 않는다.
+ */
 import { type DestinationStream, type LevelWithSilent, type Logger } from "pino";
 import pino from "pino";
 import type { Env } from "../schemas/env.schema.js";

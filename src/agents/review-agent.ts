@@ -1,3 +1,7 @@
+/**
+ * 품질, 보안, 성능 에이전트. 파일을 쓰거나 명령을 실행하지 않고, 이미 모은 diff만 모델에 보낸다.
+ * 일부 청크가 실패해도 성공한 청크의 발견은 남긴다.
+ */
 import { addLlmUsage, EMPTY_LLM_USAGE, type LlmProvider, type LlmUsage } from "../integrations/llm/llm-provider.js";
 import { AppError } from "../utils/app-error.js";
 import { chunkReviewFiles } from "./chunk-files.js";

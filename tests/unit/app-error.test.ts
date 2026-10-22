@@ -1,3 +1,4 @@
+/** 5xx 메시지는 기본적으로 숨기고, 4xx는 expose된 문구만 밖으로 보낸다. */
 import { describe, expect, it } from "vitest";
 import { AppError } from "../../src/utils/app-error.js";
 

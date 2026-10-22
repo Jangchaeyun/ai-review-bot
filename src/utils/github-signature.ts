@@ -1,8 +1,13 @@
+/**
+ * GitHub Webhook 서명을 수신 바이트 기준으로 확인한다.
+ * 길이가 다를 때는 비교하지 않고, 같을 때만 timingSafeEqual을 쓴다.
+ */
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const SHA256_PREFIX = "sha256=";
 const SHA256_HEX_LENGTH = 64;
 
+/** sha256= 뒤의 64자리 hex만 서명으로 인정한다. */
 function decodeSignature(signatureHeader: string): Buffer | undefined {
   if (!signatureHeader.startsWith(SHA256_PREFIX)) {
     return undefined;

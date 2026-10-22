@@ -1,3 +1,7 @@
+/**
+ * X-GitHub-Delivery 중복을 가린다. 기본 TTL은 24시간이다.
+ * 응답 전에 프로세스가 죽으면 키를 지워 GitHub 재시도가 같은 작업을 다시 넣게 한다.
+ */
 export const DELIVERY_TTL_MS = 24 * 60 * 60 * 1000;
 
 export interface DeliveryStore {

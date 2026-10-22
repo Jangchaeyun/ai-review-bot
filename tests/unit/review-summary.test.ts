@@ -1,3 +1,4 @@
+/** 작업 기록에 남기는 요약이 심각도 개수와 제목만 가지는지 확인한다. */
 import { describe, expect, it } from "vitest";
 import { buildReviewSummary } from "../../src/services/review-summary.js";
 

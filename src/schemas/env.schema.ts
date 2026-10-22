@@ -1,3 +1,7 @@
+/**
+ * 시작 시 읽는 환경변수. 알려진 키만 파싱하고, 필수 값이 없으면 프로세스를 종료할 수 있게 오류를 던진다.
+ * 오류 문장에는 환경변수 값을 넣지 않는다.
+ */
 import { z } from "zod";
 import { isPrivateKeyPem, normalizePrivateKey } from "../utils/private-key.js";
 

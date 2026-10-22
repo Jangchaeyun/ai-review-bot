@@ -1,3 +1,7 @@
+/**
+ * 콘솔에서 넣은 Pull Request를 읽어 큐에 넣는다.
+ * 초안과 닫힌 Pull Request는 거절하고, 설치 토큰은 그 저장소의 읽기 권한만 요청한다.
+ */
 import { randomUUID } from "node:crypto";
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";

@@ -1,3 +1,4 @@
+/** Pull Request 주소 형식과, 오류 문장에 입력 원문이 없는지를 확인한다. */
 import { describe, expect, it } from "vitest";
 import { AppError } from "../../src/utils/app-error.js";
 import { parsePullRequestUrl } from "../../src/services/parse-pull-request-url.js";

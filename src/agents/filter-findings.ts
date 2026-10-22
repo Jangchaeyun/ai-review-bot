@@ -1,3 +1,7 @@
+/**
+ * 모델 출력 중 diff에 실제로 있는 발견만 남긴다.
+ * 보안 항목은 확신이 낮으면 심각도를 low로 내리고, 고른 언어로 불확실하다는 문장을 붙인다.
+ */
 import { indexPatch, evidenceInDiff, lineRangeInDiff, type FileDiffIndex } from "./diff-index.js";
 import type { ReviewFinding } from "../schemas/review-finding.schema.js";
 import { reviewLanguageFrom, type ReviewLanguage } from "../services/review-language.js";
