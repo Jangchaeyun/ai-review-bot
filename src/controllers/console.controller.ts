@@ -1,3 +1,7 @@
+/**
+ * 콘솔 요청을 검증한다. 주소 형식과 언어를 확인한 뒤 리뷰 등록은 서비스에 맡긴다.
+ * 페이지에는 비밀을 넣지 않고, 스크립트는 같은 출처로만 요청하게 한다.
+ */
 import type { Request, Response } from "express";
 import { z } from "zod";
 import { AppError } from "../utils/app-error.js";

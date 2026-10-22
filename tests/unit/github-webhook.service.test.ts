@@ -1,3 +1,4 @@
+/** 서명 실패는 본문을 보지 않고, 받을 이벤트만 큐에 들어가는지 확인한다. */
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { receiveGithubWebhook } from "../../src/services/github-webhook.service.js";

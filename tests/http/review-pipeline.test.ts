@@ -1,3 +1,4 @@
+/** Webhook부터 가짜 GitHub와 LLM을 거쳐 리뷰가 게시되는 경로를 확인한다. */
 import { generateKeyPairSync } from "node:crypto";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";

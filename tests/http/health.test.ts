@@ -1,3 +1,4 @@
+/** 헬스 응답에 비밀이나 서버 헤더가 없는지 확인한다. */
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createTestApp } from "../helpers/test-app.js";

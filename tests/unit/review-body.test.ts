@@ -1,3 +1,4 @@
+/** 리뷰 본문과 인라인 코멘트가 서버 규칙대로 조립되는지 확인한다. */
 import { describe, expect, it } from "vitest";
 import type { AggregatedFinding } from "../../src/agents/aggregate-findings.js";
 import { buildReviewPost } from "../../src/integrations/github/review-body.js";

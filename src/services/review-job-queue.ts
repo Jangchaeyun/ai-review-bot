@@ -1,3 +1,7 @@
+/**
+ * 리뷰 작업 큐. Webhook은 여기 넣은 뒤 바로 202를 반환하고, 핸들러는 응답 다음에 실행된다.
+ * 메모리 구현은 테스트용이다. 운영은 SQLite 큐를 쓴다.
+ */
 import type { Logger } from "pino";
 import type { ReviewJob } from "./review-job.js";
 

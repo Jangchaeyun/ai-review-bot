@@ -1,3 +1,7 @@
+/**
+ * 같은 owner/repo, PR 번호, head SHA에 리뷰를 한 번만 게시하기 위한 키 저장소.
+ * 키를 잡은 뒤 게시 전에 죽으면 그 SHA는 자동으로 다시 올리지 않는다.
+ */
 const MAX_KEYS = 5_000;
 
 export interface ReviewPublishStore {

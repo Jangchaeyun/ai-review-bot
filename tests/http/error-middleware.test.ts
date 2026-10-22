@@ -1,3 +1,4 @@
+/** 오류 응답이 입력 원문과 비밀을 다시 내보내지 않는지 확인한다. */
 import { Router } from "express";
 import request from "supertest";
 import { describe, expect, it } from "vitest";

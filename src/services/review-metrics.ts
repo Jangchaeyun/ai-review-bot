@@ -1,3 +1,6 @@
+/**
+ * 프로세스 안의 리뷰 성공·실패 횟수. 로그의 누적 실패율을 계산할 때 쓴다.
+ */
 export type ReviewMetricSnapshot = {
   handled: number;
   failed: number;

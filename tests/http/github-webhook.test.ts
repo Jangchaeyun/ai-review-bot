@@ -1,3 +1,4 @@
+/** 잘못된 서명은 401, 받을 이벤트는 202, 관심 없는 이벤트와 중복 딜리버리는 200이다. */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createRecordingReviewJobQueue } from "../helpers/recording-queue.js";
 import { postWebhook, pullRequestPayload, signGithubBody } from "../helpers/github-webhook.js";

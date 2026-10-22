@@ -1,3 +1,7 @@
+/**
+ * pull_request Webhook 중 opened, synchronize, reopened만 받는다.
+ * 그 외 이벤트는 스키마를 통과해도 큐에 넣지 않는다.
+ */
 import { z } from "zod";
 
 export const SUPPORTED_PULL_REQUEST_ACTIONS = ["opened", "synchronize", "reopened"] as const;

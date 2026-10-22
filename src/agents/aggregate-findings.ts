@@ -1,3 +1,7 @@
+/**
+ * 같은 파일에서 줄이 겹치고 요지가 같은 발견을 하나로 합친다. 더 높은 심각도를 남긴다.
+ * 이 통합은 모델이 아니라 결정적 코드다.
+ */
 import { AGENT_IDS, type AgentId, type ReviewFinding, type Severity } from "../schemas/review-finding.schema.js";
 
 export type SourcedFinding = ReviewFinding & {

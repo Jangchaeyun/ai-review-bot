@@ -1,3 +1,7 @@
+/**
+ * 큐에 들어온 작업으로 diff를 읽고, 세 에이전트를 돌린 뒤 리뷰를 게시한다.
+ * 에이전트가 모두 실패하면 댓글을 만들지 않는다.
+ */
 import type { Logger } from "pino";
 import { createReviewAgents } from "../agents/review-agent.js";
 import { createReviewRunner, type ReviewRunner } from "../agents/run-review.js";
@@ -42,6 +46,7 @@ export function createReviewPipeline(deps: ReviewPipelineDeps): ReviewJobHandler
         repo: job.repo,
         pullNumber: job.pullNumber,
       });
+      // 작업에 언어가 없으면 한국어로 분석하고 댓글도 한국어로 조립한다.
       const language = reviewLanguageFrom(job.language);
       const review = await deps.runner.run({
         title: read.metadata.title,
@@ -51,6 +56,7 @@ export function createReviewPipeline(deps: ReviewPipelineDeps): ReviewJobHandler
       usage = review.usage;
 
       if (review.status === "failed") {
+        // 세 에이전트가 모두 실패하면 빈 댓글을 남기지 않는다.
         deps.onFinished?.(job.deliveryId, buildReviewSummary({ outcome: "agents-failed" }));
         logFinished(deps, job, started, now(), usage, deps.metrics.record("failed"), {
           result: "agents-failed",

@@ -1,3 +1,7 @@
+/**
+ * HTTP 앱을 조립한다. listen은 하지 않아서 테스트가 포트를 열지 않고 요청을 보낼 수 있다.
+ * Webhook만 raw body를 보존하고, 나머지 경로는 JSON으로 파싱한다.
+ */
 import express, { type Express, type Router } from "express";
 import type { Logger } from "pino";
 import { errorMiddleware } from "./middleware/error-middleware.js";
@@ -27,6 +31,7 @@ export type AppDeps = {
 
 const WEBHOOK_PATH = "/webhooks/github";
 
+/** 헬스, 콘솔, GitHub Webhook 순서로 라우트를 붙이고 마지막에 404와 오류 처리를 둔다. */
 export function createApp(deps: AppDeps): Express {
   const app = express();
   app.disable("x-powered-by");

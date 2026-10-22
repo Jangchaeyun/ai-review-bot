@@ -1,3 +1,4 @@
+/** Webhook 헤더와 raw body를 서비스로 넘긴다. 컨트롤러는 GitHub API를 호출하지 않는다. */
 import type { Request, Response } from "express";
 import { receiveGithubWebhook, type GithubWebhookDeps } from "../services/github-webhook.service.js";
 import { requestPath } from "../utils/request-path.js";

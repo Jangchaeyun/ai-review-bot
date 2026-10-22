@@ -1,3 +1,4 @@
+/** 테스트 앱은 listen하지 않고, 저장 상태는 메모리만 쓴다. */
 import type { Express, Router } from "express";
 import { createApp, type AppDeps } from "../../src/app.js";
 import { parseEnv } from "../../src/services/load-env.js";

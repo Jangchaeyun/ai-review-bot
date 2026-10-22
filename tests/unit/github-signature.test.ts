@@ -1,3 +1,4 @@
+/** 서명 길이가 다를 때는 비교하지 않고, 같을 때만 통과하는지 확인한다. */
 import { describe, expect, it } from "vitest";
 import { verifyGithubSignature } from "../../src/utils/github-signature.js";
 import { signGithubBody } from "../helpers/github-webhook.js";

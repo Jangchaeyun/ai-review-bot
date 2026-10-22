@@ -1,3 +1,4 @@
+/** 콘솔 페이지와 수동 리뷰 요청의 HTTP 응답을 확인한다. */
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 import { createTestApp } from "../helpers/test-app.js";

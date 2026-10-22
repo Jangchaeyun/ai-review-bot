@@ -1,3 +1,7 @@
+/**
+ * 리뷰 댓글을 GitHub에 남긴다. 게시 직전에 head SHA가 아직 최신인지 확인한다.
+ * 인라인 코멘트가 422로 거절되면 요약만 다시 게시한다.
+ */
 import { createAppAuth } from "@octokit/auth-app";
 import { Octokit } from "@octokit/rest";
 import type { Logger } from "pino";
