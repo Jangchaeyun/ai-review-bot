@@ -39,6 +39,31 @@ describe("diff index and finding filter", () => {
     expect([...index.lines.values()].join("\n")).not.toContain("return userInput");
   });
 
+  it("anchors a wide range on the line that contains the evidence", () => {
+    const patch = [
+      "@@ -0,0 +1,4 @@",
+      "+// 리뷰 봇 확인용 샘플이다. percent를 100으로 나누지 않아 할인액이 커진다.",
+      "+export function discount(price, percent) {",
+      "+  return price - price * percent;",
+      "+}",
+    ].join("\n");
+    const result = filterFindings(
+      [
+        finding({
+          category: "quality",
+          filePath: "samples/discount.js",
+          lineStart: 2,
+          lineEnd: 3,
+          evidence: "return price - price * percent;",
+          explanation: "percent를 100으로 나누지 않습니다.",
+          suggestion: "percent를 100으로 나눕니다.",
+        }),
+      ],
+      [{ path: "samples/discount.js", patch }],
+    );
+    expect(result.accepted[0]).toMatchObject({ lineStart: 3, lineEnd: 3 });
+  });
+
   it("keeps a finding whose evidence and lines exist in the new file side", () => {
     const result = filterFindings([finding()], [{ path: "src/ping.ts", patch: PATCH }]);
     expect(result.droppedCount).toBe(0);

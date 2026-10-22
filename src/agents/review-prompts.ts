@@ -18,7 +18,7 @@ const SHARED_RULES = [
   "각 항목의 필드는 category, severity, title, filePath, lineStart, lineEnd, evidence, explanation, suggestion, confidence다.",
   "severity는 critical, high, medium, low 중 하나다. confidence는 0 이상 1 이하다.",
   "evidence는 해당 파일 diff의 새 코드에 실제로 있는 부분 문자열이어야 한다. filePath와 줄 번호도 그 diff에 있는 값만 사용한다.",
-  "LINES 구간의 각 줄은 새 파일 기준 `번호|내용`이다. lineStart와 lineEnd는 그 번호를 쓴다. evidence에는 번호와 막대를 넣지 않는다.",
+  "LINES 구간의 각 줄은 새 파일 기준 `번호|내용`이다. lineStart와 lineEnd는 evidence가 들어 있는 번호만 쓴다. 함수 선언이나 주석처럼 문제가 없는 줄은 범위에 넣지 않는다. evidence에는 번호와 막대를 넣지 않는다.",
   "설명과 제안에는 diff에 없는 URL을 넣지 않는다.",
 ].join("\n");
 
@@ -50,7 +50,7 @@ export const SECURITY_SYSTEM_PROMPT = promptFor(
 
 export const PERFORMANCE_SYSTEM_PROMPT = promptFor(
   "performance",
-  "성능만 본다. 반복 호출, 블로킹, 한 요청에서 커지는 메모리처럼 diff에서 확인되는 비용만 지적한다. 측정 없는 미세 최적화는 항목으로 만들지 않는다.",
+  "성능만 본다. 반복 호출, 블로킹, 한 요청에서 커지는 메모리처럼 diff에서 확인되는 비용만 지적한다. 측정 없는 미세 최적화와, 단위를 빠뜨리거나 틀린 계산은 항목으로 만들지 않는다.",
 );
 
 function sanitizeUntrusted(value: string): string {

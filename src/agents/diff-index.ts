@@ -87,3 +87,66 @@ export function lineRangeInDiff(lineStart: number, lineEnd: number, index: FileD
   }
   return true;
 }
+
+function isDecorationLine(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length === 0 || trimmed === "{" || trimmed === "}" || trimmed === "};") {
+    return true;
+  }
+  if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*") || trimmed.startsWith("#")) {
+    return true;
+  }
+  return /^(export\s+)?(default\s+)?(async\s+)?function\b/.test(trimmed)
+    || /^(export\s+)?(default\s+)?class\b/.test(trimmed);
+}
+
+/**
+ * 인라인 댓글은 모델이 잡은 범위 전체가 아니라 evidence가 들어 있는 줄에 붙인다.
+ * 함수 선언과 주석만 범위에 남아 본문 줄이 있으면 그 줄만 남긴다.
+ */
+export function anchorLineRange(
+  evidence: string,
+  index: FileDiffIndex,
+  lineStart: number,
+  lineEnd: number,
+): { lineStart: number; lineEnd: number } {
+  const needle = evidence.replace(/\r\n/g, "\n").trim();
+  if (needle.length < 6 || !lineRangeInDiff(lineStart, lineEnd, index)) {
+    return { lineStart, lineEnd };
+  }
+
+  const lines: { line: number; text: string }[] = [];
+  for (let line = lineStart; line <= lineEnd; line += 1) {
+    const text = index.lines.get(line);
+    if (text === undefined) {
+      return { lineStart, lineEnd };
+    }
+    lines.push({ line, text });
+  }
+
+  let window: { line: number; text: string }[] | undefined;
+  for (let size = 1; size <= lines.length; size += 1) {
+    for (let start = 0; start + size <= lines.length; start += 1) {
+      const candidate = lines.slice(start, start + size);
+      if (candidate.map((item) => item.text).join("\n").includes(needle)) {
+        window = candidate;
+        break;
+      }
+    }
+    if (window !== undefined) {
+      break;
+    }
+  }
+  if (window === undefined) {
+    return { lineStart, lineEnd };
+  }
+
+  const substantive = window.filter((item) => !isDecorationLine(item.text));
+  const chosen = substantive.length > 0 ? substantive : window;
+  const first = chosen[0];
+  const last = chosen[chosen.length - 1];
+  if (first === undefined || last === undefined) {
+    return { lineStart, lineEnd };
+  }
+  return { lineStart: first.line, lineEnd: last.line };
+}
