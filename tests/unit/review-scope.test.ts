@@ -1,3 +1,4 @@
+/** 분석에서 빼는 파일과 크기 제한을 확인한다. */
 import { describe, expect, it } from "vitest";
 import { selectReviewFiles, type GithubChangedFile, type ReviewLimits } from "../../src/integrations/github/review-scope.js";
 

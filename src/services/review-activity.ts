@@ -1,3 +1,6 @@
+/**
+ * 콘솔에 보여주는 작업 기록. 큐 안의 전체 페이로드가 아니라 상태와 요약만 담는다.
+ */
 import type { ReviewLanguage } from "./review-language.js";
 import type { ReviewSummary } from "./review-summary.js";
 

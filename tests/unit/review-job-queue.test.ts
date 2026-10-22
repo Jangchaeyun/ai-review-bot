@@ -1,3 +1,4 @@
+/** 큐 등록이 응답 다음에 실행되고, 등록 실패가 호출부에 전달되는지 확인한다. */
 import { Writable } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parseEnv } from "../../src/services/load-env.js";

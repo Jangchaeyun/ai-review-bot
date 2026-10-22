@@ -1,3 +1,4 @@
+/** 딜리버리 키의 중복과 만료를 확인한다. */
 import { describe, expect, it } from "vitest";
 import { InMemoryDeliveryStore } from "../../src/services/delivery-store.js";
 

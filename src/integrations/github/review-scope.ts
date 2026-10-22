@@ -1,3 +1,7 @@
+/**
+ * 리뷰할 파일과 건너뛸 파일을 가른다.
+ * 바이너리, 생성물, 락파일, vendor, dist, 이미지는 본문을 결과에 넣지 않고 이유만 남긴다.
+ */
 export const DEFAULT_REVIEW_LIMITS = {
   maxFiles: 20,
   maxFileBytes: 200 * 1024,

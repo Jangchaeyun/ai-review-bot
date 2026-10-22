@@ -1,3 +1,4 @@
+/** 근거 필터, 발견 파싱, 중복 통합을 확인한다. */
 import { describe, expect, it } from "vitest";
 import { aggregateFindings, type SourcedFinding } from "../../src/agents/aggregate-findings.js";
 import { indexPatch } from "../../src/agents/diff-index.js";

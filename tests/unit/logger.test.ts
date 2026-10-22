@@ -1,3 +1,4 @@
+/** 로그에서 비밀 필드가 [Redacted]로 가려지는지 확인한다. */
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";
 import { parseEnv } from "../../src/services/load-env.js";

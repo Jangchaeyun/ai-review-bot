@@ -1,3 +1,7 @@
+/**
+ * 딜리버리 키, 게시 키, 작업 큐를 한 SQLite 파일에 남긴다.
+ * 이 파일은 프로세스 하나에서만 연다. 인스턴스가 둘 이상이면 공유 저장소가 따로 필요하다.
+ */
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";

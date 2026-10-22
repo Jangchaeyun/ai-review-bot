@@ -1,3 +1,7 @@
+/**
+ * GitHub에 올릴 리뷰 Markdown과 인라인 코멘트를 서버가 조립한다.
+ * 모델이 준 JSON이나 자유 형식 마크다운은 그대로 올리지 않는다.
+ */
 import type { AggregatedFinding } from "../../agents/aggregate-findings.js";
 import { lineRangeInDiff, indexPatch } from "../../agents/diff-index.js";
 import type { ReviewFile } from "../../agents/filter-findings.js";

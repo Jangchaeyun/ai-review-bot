@@ -1,3 +1,4 @@
+/** .env가 이미 있는 환경변수를 덮어쓰지 않는지 확인한다. */
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

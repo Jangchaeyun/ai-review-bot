@@ -1,3 +1,6 @@
+/**
+ * 도메인 오류다. code와 retryable로 재시도 여부를 나누고, expose가 거짓이면 클라이언트에 고정 문구만 보낸다.
+ */
 export type AppErrorOptions = {
   message: string;
   code: string;

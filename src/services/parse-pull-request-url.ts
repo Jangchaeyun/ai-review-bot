@@ -1,3 +1,7 @@
+/**
+ * 콘솔에 넣은 문자열에서 owner, repo, PR 번호를 읽는다.
+ * 실패 메시지에는 사용자가 입력한 주소를 다시 적지 않는다.
+ */
 import { AppError } from "../utils/app-error.js";
 
 const OWNER_NAME = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;

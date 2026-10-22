@@ -1,3 +1,4 @@
+/** 같은 커밋의 재게시, 422 폴백, 초안과 오래된 head의 건너뛰기를 확인한다. */
 import { generateKeyPairSync } from "node:crypto";
 import { Writable } from "node:stream";
 import { describe, expect, it } from "vitest";

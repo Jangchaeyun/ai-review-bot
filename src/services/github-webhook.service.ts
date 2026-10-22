@@ -1,3 +1,7 @@
+/**
+ * Webhook을 서명과 스키마로 검증하고, 받을 이벤트만 큐에 넣은 뒤 202를 반환한다.
+ * 서명이 틀리면 본문 스키마를 보지 않는다.
+ */
 import type { Logger } from "pino";
 import { errorResponseSchema, type ErrorResponse } from "../schemas/error-response.schema.js";
 import {

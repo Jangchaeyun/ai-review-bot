@@ -1,3 +1,7 @@
+/**
+ * 세 에이전트를 함께 실행하고 성공한 결과만 합친다.
+ * 셋이 모두 실패하면 발견 목록을 만들지 않는다.
+ */
 import type { Logger } from "pino";
 import { addLlmUsage, EMPTY_LLM_USAGE, type LlmUsage } from "../integrations/llm/llm-provider.js";
 import { AppError } from "../utils/app-error.js";

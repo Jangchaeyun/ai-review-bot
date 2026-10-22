@@ -1,3 +1,6 @@
+/**
+ * .env 파일을 직접 읽는다. 이미 프로세스에 있는 키는 덮어쓰지 않고, dotenv 패키지는 쓰지 않는다.
+ */
 import { readFileSync } from "node:fs";
 
 const ENV_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/;

@@ -1,3 +1,7 @@
+/**
+ * 오류를 { error: { code, message, path } }로 보낸다.
+ * 검증 실패의 issues.message에는 사용자가 넣은 원문을 다시 적지 않는다.
+ */
 import type { ErrorRequestHandler, NextFunction, Request, Response } from "express";
 import type { Logger } from "pino";
 import { ZodError } from "zod";
@@ -28,6 +32,7 @@ function isPayloadTooLarge(error: unknown): boolean {
   return status === 413 || statusCode === 413 || type === "entity.too.large";
 }
 
+/** expose가 거짓이거나 예상하지 못한 예외는 고정 문구만 밖으로 보낸다. */
 function publicError(error: unknown, path: string): { statusCode: number; body: ErrorResponse } {
   if (error instanceof AppError) {
     return {
