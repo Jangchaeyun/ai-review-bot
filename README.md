@@ -2,6 +2,16 @@
 
 GitHub App Webhook으로 Pull Request를 받아 diff를 읽고, 품질·보안·성능 에이전트가 찾은 내용을 PR 리뷰 댓글로 남기는 Node.js 서버입니다. 코드를 수정하거나 명령을 실행하지 않습니다.
 
+## 포트폴리오에 넣을 소개
+
+GitHub Pull Request가 열리거나 커밋이 갱신되면 변경 diff만 읽어 품질, 보안, 성능 관점의 리뷰 댓글을 남기는 봇입니다. 모델이 만든 문장을 그대로 올리지 않고, 스키마와 diff 근거를 통과한 항목만 서버가 Markdown으로 조립합니다. 브라우저에서 Pull Request 주소를 넣고 댓글 언어를 한국어 또는 영어로 고를 수 있습니다.
+
+- 기술: TypeScript, Node.js, Express, Zod, Octokit, OpenAI 호환 Chat Completions, SQLite, Vitest
+- Webhook 서명은 수신한 원문 바이트로 확인하고, 분석이 끝나기 전에 `202`로 응답합니다.
+- 세 에이전트의 결과는 결정적 코드로 합치고, diff에 없는 경로·줄·근거는 버립니다.
+- 대기 작업과 게시 기록은 SQLite에 남아 프로세스가 다시 시작돼도 같은 커밋을 중복 게시하지 않습니다.
+- 저장소: https://github.com/Jangchaeyun/ai-review-bot
+
 ## 요구 사항
 
 - Node.js 22.5 이상
