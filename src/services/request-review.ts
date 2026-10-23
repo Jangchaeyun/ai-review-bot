@@ -15,6 +15,7 @@ import { normalizePrivateKey } from "../utils/private-key.js";
 import { parsePullRequestUrl } from "./parse-pull-request-url.js";
 import type { ReviewJobRecord } from "./review-activity.js";
 import type { ReviewJob } from "./review-job.js";
+import { accountName } from "./account-store.js";
 import { reviewLanguageFrom, type ReviewLanguage } from "./review-language.js";
 
 const READ_PERMISSIONS = {
@@ -88,7 +89,7 @@ function githubError(error: unknown, notFound: AppError): AppError {
   });
 }
 
-export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: string, language?: ReviewLanguage) => Promise<ReviewJobRecord> {
+export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: string, language?: ReviewLanguage, requestedBy?: string) => Promise<ReviewJobRecord> {
   const privateKey = normalizePrivateKey(deps.env.GITHUB_APP_PRIVATE_KEY);
   const fetchImpl = createGithubFetch({
     fetchImpl: deps.fetchImpl ?? globalThis.fetch,
@@ -113,7 +114,7 @@ export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: s
     },
   });
 
-  return async (pullRequestUrl, language) => {
+  return async (pullRequestUrl, language, requestedBy) => {
     const target = parsePullRequestUrl(pullRequestUrl);
     let installationId: number;
     try {
@@ -193,6 +194,8 @@ export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: s
 
     const updatedAt = deps.now?.() ?? Date.now();
     const reviewLanguage = reviewLanguageFrom(language);
+    // 콘솔에서 요청한 이름만 남긴다. Webhook 작업은 요청자를 비운다.
+    const requester = requestedBy === undefined ? undefined : accountName(requestedBy)?.username;
     const job: ReviewJob = {
       deliveryId: randomUUID(),
       action: "synchronize",
@@ -203,6 +206,7 @@ export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: s
       pullNumber: target.pullNumber,
       headSha: pull.head.sha.toLowerCase(),
       language: reviewLanguage,
+      ...(requester === undefined ? {} : { requestedBy: requester }),
     };
     deps.enqueue(job);
     deps.logger.info(
@@ -224,6 +228,7 @@ export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: s
       headSha: job.headSha,
       status: "pending",
       language: reviewLanguage,
+      ...(requester === undefined ? {} : { requestedBy: requester }),
       updatedAt,
     };
   };

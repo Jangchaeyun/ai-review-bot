@@ -4,7 +4,9 @@
  */
 import type { Request, Response } from "express";
 import { z } from "zod";
+import { currentUser } from "./account.controller.js";
 import { AppError } from "../utils/app-error.js";
+import type { AccountStore } from "../services/account-store.js";
 import { CONSOLE_PAGE } from "../services/console-page.js";
 import { parsePullRequestUrl } from "../services/parse-pull-request-url.js";
 import type { ReviewJobRecord } from "../services/review-activity.js";
@@ -17,8 +19,26 @@ const requestSchema = z.object({
 
 export type ConsoleControllerDeps = {
   listJobs: (limit?: number) => ReviewJobRecord[];
-  requestReview?: (pullRequestUrl: string, language?: ReviewLanguage) => Promise<ReviewJobRecord>;
+  requestReview?: (pullRequestUrl: string, language?: ReviewLanguage, requestedBy?: string) => Promise<ReviewJobRecord>;
+  accounts?: AccountStore;
 };
+
+/** 계정이 연결된 콘솔은 로그인 세션이 있을 때만 작업 목록과 리뷰 요청을 받는다. */
+function requireLogin(req: Request, deps: ConsoleControllerDeps) {
+  if (deps.accounts === undefined) {
+    return undefined;
+  }
+  const user = currentUser(req, deps.accounts);
+  if (user === undefined) {
+    throw new AppError({
+      message: "로그인이 필요합니다.",
+      code: "AUTH_REQUIRED",
+      statusCode: 401,
+      expose: true,
+    });
+  }
+  return user;
+}
 
 export function createConsoleController(deps: ConsoleControllerDeps) {
   return {
@@ -29,7 +49,8 @@ export function createConsoleController(deps: ConsoleControllerDeps) {
         .type("html")
         .send(CONSOLE_PAGE);
     },
-    jobs(_req: Request, res: Response): void {
+    jobs(req: Request, res: Response): void {
+      requireLogin(req, deps);
       res.status(200).set("cache-control", "no-store").json({ jobs: deps.listJobs() });
     },
     async review(req: Request, res: Response): Promise<void> {
@@ -41,9 +62,12 @@ export function createConsoleController(deps: ConsoleControllerDeps) {
           expose: true,
         });
       }
+      const user = requireLogin(req, deps);
       const body = requestSchema.parse(req.body);
       parsePullRequestUrl(body.pullRequestUrl);
-      const job = await deps.requestReview(body.pullRequestUrl, body.language ?? "ko");
+      const job = user === undefined
+        ? await deps.requestReview(body.pullRequestUrl, body.language ?? "ko")
+        : await deps.requestReview(body.pullRequestUrl, body.language ?? "ko", user.username);
       res.status(202).json({ job });
     },
   };

@@ -31,6 +31,7 @@ function main(): void {
     reviewJobQueue: runtime.queue,
     listJobs: runtime.listJobs,
     requestReview: runtime.requestReview,
+    accounts: runtime.accounts,
     ...(runtime.deliveries === undefined ? {} : { deliveryStore: runtime.deliveries }),
   });
   const server = app.listen(env.PORT, () => {

@@ -6,6 +6,8 @@ import express, { type Express, type Router } from "express";
 import type { Logger } from "pino";
 import { errorMiddleware } from "./middleware/error-middleware.js";
 import { notFoundMiddleware } from "./middleware/not-found-middleware.js";
+import type { AccountStore } from "./services/account-store.js";
+import { createAccountRouter } from "./routes/account.route.js";
 import { createConsoleRouter } from "./routes/console.route.js";
 import { createGithubWebhookRouter } from "./routes/github-webhook.route.js";
 import type { ReviewJobRecord } from "./services/review-activity.js";
@@ -26,7 +28,8 @@ export type AppDeps = {
   deliveryStore?: DeliveryStore;
   reviewJobQueue?: ReviewJobQueue;
   listJobs?: (limit?: number) => ReviewJobRecord[];
-  requestReview?: (pullRequestUrl: string, language?: ReviewLanguage) => Promise<ReviewJobRecord>;
+  requestReview?: (pullRequestUrl: string, language?: ReviewLanguage, requestedBy?: string) => Promise<ReviewJobRecord>;
+  accounts?: AccountStore;
 };
 
 const WEBHOOK_PATH = "/webhooks/github";
@@ -48,9 +51,14 @@ export function createApp(deps: AppDeps): Express {
   });
 
   app.use("/health", createHealthRouter(deps.env));
+  // 계정 저장소가 있을 때만 가입과 로그인을 연다. 테스트 앱은 이 경로를 빼 둘 수 있다.
+  if (deps.accounts !== undefined) {
+    app.use(createAccountRouter({ accounts: deps.accounts }));
+  }
   app.use(createConsoleRouter({
     listJobs: deps.listJobs ?? (() => []),
     ...(deps.requestReview === undefined ? {} : { requestReview: deps.requestReview }),
+    ...(deps.accounts === undefined ? {} : { accounts: deps.accounts }),
   }));
   app.use(
     WEBHOOK_PATH,

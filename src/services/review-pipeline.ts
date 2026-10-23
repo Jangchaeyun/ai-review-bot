@@ -19,6 +19,7 @@ import { buildReviewSummary, type ReviewSummary } from "./review-summary.js";
 import { reviewLanguageFrom, type ReviewLanguage } from "./review-language.js";
 import { InMemoryReviewPublishStore, type ReviewPublishStore } from "./review-publish-store.js";
 import { createRequestReview } from "./request-review.js";
+import { createMemoryAccountStore, type AccountStore } from "./account-store.js";
 import { openReviewState } from "./sqlite-review-state.js";
 import type { ReviewJobRecord } from "./review-activity.js";
 import type { DeliveryStore } from "./delivery-store.js";
@@ -165,7 +166,8 @@ export type ReviewRuntime = {
   metrics: InMemoryReviewMetrics;
   deliveries?: DeliveryStore;
   listJobs: (limit?: number) => ReviewJobRecord[];
-  requestReview: (pullRequestUrl: string, language?: ReviewLanguage) => Promise<ReviewJobRecord>;
+  requestReview: (pullRequestUrl: string, language?: ReviewLanguage, requestedBy?: string) => Promise<ReviewJobRecord>;
+  accounts: AccountStore;
   close(): Promise<void>;
 };
 
@@ -240,6 +242,7 @@ export function createReviewRuntime(deps: ReviewRuntimeDeps): ReviewRuntime {
       metrics,
       queue,
       listJobs: () => [],
+      accounts: createMemoryAccountStore(now),
       requestReview: createRequestReview({
         env: deps.env,
         logger: deps.logger,
@@ -260,6 +263,7 @@ export function createReviewRuntime(deps: ReviewRuntimeDeps): ReviewRuntime {
     queue,
     deliveries: persistent.deliveries,
     listJobs: (limit?: number) => persistent.listJobs(limit),
+    accounts: persistent.accounts,
     requestReview: createRequestReview({
       env: deps.env,
       logger: deps.logger,

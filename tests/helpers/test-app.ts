@@ -5,6 +5,7 @@ import { parseEnv } from "../../src/services/load-env.js";
 import type { DeliveryStore } from "../../src/services/delivery-store.js";
 import type { ReviewJobQueue } from "../../src/services/review-job-queue.js";
 import type { ReviewJobRecord } from "../../src/services/review-activity.js";
+import type { AccountStore } from "../../src/services/account-store.js";
 import type { ReviewLanguage } from "../../src/services/review-language.js";
 import { createLogger } from "../../src/utils/logger.js";
 
@@ -27,7 +28,8 @@ export type TestAppOverrides = {
   deliveryStore?: DeliveryStore;
   reviewJobQueue?: ReviewJobQueue;
   listJobs?: (limit?: number) => ReviewJobRecord[];
-  requestReview?: (pullRequestUrl: string, language?: ReviewLanguage) => Promise<ReviewJobRecord>;
+  requestReview?: (pullRequestUrl: string, language?: ReviewLanguage, requestedBy?: string) => Promise<ReviewJobRecord>;
+  accounts?: AccountStore;
 };
 
 export function createTestApp(extraRouters?: Router[], overrides?: TestAppOverrides): Express {
@@ -49,6 +51,9 @@ export function createTestApp(extraRouters?: Router[], overrides?: TestAppOverri
   }
   if (overrides?.requestReview !== undefined) {
     deps.requestReview = overrides.requestReview;
+  }
+  if (overrides?.accounts !== undefined) {
+    deps.accounts = overrides.accounts;
   }
 
   return createApp(deps);

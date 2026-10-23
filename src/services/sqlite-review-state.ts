@@ -15,6 +15,7 @@ import type { ReviewJob } from "./review-job.js";
 import type { ReviewJobHandler, ReviewJobQueue } from "./review-job-queue.js";
 import type { ReviewPublishStore } from "./review-publish-store.js";
 import { REVIEW_LANGUAGES } from "./review-language.js";
+import { createSqliteAccountStore, type AccountStore } from "./account-store.js";
 import { reviewSummarySchema, type ReviewSummary } from "./review-summary.js";
 
 const DELIVERY_TTL_MS = 24 * 60 * 60 * 1000;
@@ -29,6 +30,7 @@ const reviewJobSchema = z.object({
   pullNumber: z.number().int().positive(),
   headSha: z.string().regex(/^[0-9a-f]{40}$/i),
   language: z.enum(REVIEW_LANGUAGES).optional(),
+  requestedBy: z.string().min(2).max(32).optional(),
 });
 
 const idRowSchema = z.object({
@@ -60,6 +62,7 @@ export type ReviewState = {
   };
   listJobs(limit?: number): ReviewJobRecord[];
   recordSummary(deliveryId: string, summary: ReviewSummary): void;
+  accounts: AccountStore;
   close(): void;
 };
 
@@ -69,6 +72,7 @@ export function openReviewState(path: string, options?: { now?: () => number; de
   }
   const db = new DatabaseSync(path);
   const now = options?.now ?? Date.now;
+  const accounts = createSqliteAccountStore(db, now);
   const deliveryTtlMs = options?.deliveryTtlMs ?? DELIVERY_TTL_MS;
   let stopped = false;
   db.prepare("PRAGMA journal_mode = WAL").get();
@@ -310,6 +314,9 @@ export function openReviewState(path: string, options?: { now?: () => number; de
           if (payload.success && payload.data.language !== undefined) {
             record.language = payload.data.language;
           }
+          if (payload.success && payload.data.requestedBy !== undefined) {
+            record.requestedBy = payload.data.requestedBy;
+          }
         } catch {
           // 손상된 작업 본문은 언어 표시만 생략한다.
         }
@@ -327,6 +334,7 @@ export function openReviewState(path: string, options?: { now?: () => number; de
       }
       return jobs;
     },
+    accounts,
     recordSummary(deliveryId, summary) {
       const text = JSON.stringify(summary);
       if (text.length > 8_000) {

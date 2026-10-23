@@ -193,4 +193,110 @@ describe("sqlite review state", () => {
     expect(seen).toEqual(["en"]);
     expect(state.listJobs()[0]?.language).toBe("en");
   });
+
+  it("keeps one user when the same name is registered again", () => {
+    const path = stateFile();
+    const first = openReviewState(path);
+    states.push(first);
+    const founder = first.accounts.register({
+      username: "Mina",
+      usernameKey: "mina",
+      passwordHash: "hash-one",
+      position: "representative",
+      companyName: "에이커",
+      businessNumber: "1234567891",
+      representative: "홍길동",
+      employeeNumber: "A-1001",
+      department: "개발",
+    });
+    expect(founder.status).toBe("created");
+    if (founder.status !== "created" || founder.inviteCode === undefined) {
+      return;
+    }
+    expect(first.accounts.register({
+      username: "mina",
+      usernameKey: "mina",
+      passwordHash: "hash-two",
+      position: "employee",
+      inviteCode: founder.inviteCode,
+      employeeNumber: "B-2002",
+    }).status).toBe("duplicate");
+    states.pop()?.close();
+
+    const second = openReviewState(path);
+    states.push(second);
+    expect(second.accounts.findByUsernameKey("mina")?.user).toMatchObject({
+      username: "Mina",
+      role: "admin",
+      position: "representative",
+      companyName: "에이커",
+    });
+    const persistedInvite = second.accounts.company()?.inviteCode;
+    if (persistedInvite === undefined) {
+      return;
+    }
+    expect(second.accounts.company()).toMatchObject({ businessNumber: "1234567891", representative: "홍길동" });
+    expect(second.accounts.register({
+      username: "MINA",
+      usernameKey: "mina",
+      passwordHash: "hash-three",
+      position: "employee",
+      inviteCode: persistedInvite,
+      employeeNumber: "B-2002",
+    }).status).toBe("duplicate");
+    const joined = second.accounts.register({
+      username: "jun",
+      usernameKey: "jun",
+      passwordHash: "hash-four",
+      position: "employee",
+      inviteCode: persistedInvite,
+      employeeNumber: "B-2002",
+    });
+    expect(joined).toMatchObject({ status: "created", user: { role: "member", position: "employee", companyName: "에이커" } });
+  });
+
+  it("registers a placeholder company name when a later signup sends one", () => {
+    const path = stateFile();
+    const first = openReviewState(path);
+    states.push(first);
+    states.pop()?.close();
+    const db = new DatabaseSync(path);
+    db.prepare(
+      "INSERT INTO users (id, username, username_key, password_hash, created_at) VALUES (?, ?, ?, ?, ?)",
+    ).run("user-1", "reviewer", "reviewer", "hash", 1);
+    db.close();
+
+    const second = openReviewState(path);
+    states.push(second);
+    expect(second.accounts.company()).toMatchObject({ name: "기본 조직", registered: false });
+    const joined = second.accounts.register({
+      username: "mina",
+      usernameKey: "mina",
+      passwordHash: "hash",
+      position: "representative",
+      companyName: "에이커",
+      businessNumber: "1234567891",
+      representative: "홍길동",
+      employeeNumber: "A-1001",
+    });
+    expect(joined).toMatchObject({
+      status: "created",
+      user: { role: "member", position: "representative", companyName: "에이커", employeeNumber: "A-1001" },
+    });
+    expect(second.accounts.company()).toMatchObject({
+      name: "에이커",
+      registered: true,
+      businessNumber: "1234567891",
+      representative: "홍길동",
+    });
+    const reviewer = second.accounts.findByUsernameKey("reviewer")?.user;
+    expect(reviewer).toMatchObject({ role: "admin", companyName: "에이커" });
+    expect(reviewer?.employeeNumber).toBeUndefined();
+    if (reviewer === undefined) {
+      return;
+    }
+    expect(second.accounts.updateProfile(reviewer.id, { employeeNumber: "E-9", department: "개발" })).toBe("updated");
+    expect(second.accounts.findByUsernameKey("reviewer")?.user).toMatchObject({ employeeNumber: "E-9", department: "개발" });
+    expect(second.accounts.updateProfile(reviewer.id, { employeeNumber: "E-10" })).toBe("exists");
+  });
 });

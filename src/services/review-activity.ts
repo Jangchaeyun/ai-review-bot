@@ -17,6 +17,7 @@ export type ReviewJobRecord = {
   status: ReviewJobStatus;
   updatedAt: number;
   language?: ReviewLanguage;
+  requestedBy?: string;
   summary?: ReviewSummary;
 };
 
