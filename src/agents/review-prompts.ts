@@ -22,6 +22,7 @@ const SHARED_RULES = [
   "설명과 제안에는 diff에 없는 URL을 넣지 않는다.",
 ].join("\n");
 
+/** 카테고리별 초점 문장과 공통 출력 규칙을 한 시스템 프롬프트로 잇는다. */
 function promptFor(category: FindingCategory, focus: string): string {
   const securityRule =
     category === "security"
@@ -53,10 +54,12 @@ export const PERFORMANCE_SYSTEM_PROMPT = promptFor(
   "성능만 본다. 반복 호출, 블로킹, 한 요청에서 커지는 메모리처럼 diff에서 확인되는 비용만 지적한다. 측정 없는 미세 최적화와, 단위를 빠뜨리거나 틀린 계산은 항목으로 만들지 않는다.",
 );
 
+/** 제목과 diff 안의 구분 기호를 지워 데이터가 시스템 지침처럼 닫히지 않게 한다. */
 function sanitizeUntrusted(value: string): string {
   return value.replaceAll("<<<", "").replaceAll(">>>", "");
 }
 
+/** 제목, diff, 새 파일 줄 번호를 신뢰할 수 없는 데이터 구간으로 감싸 모델에 넘긴다. */
 export function buildUserMessage(title: string | undefined, files: readonly ReviewFile[]): string {
   const safeTitle = sanitizeUntrusted(title ?? "");
   const sections = files.map((file) => {

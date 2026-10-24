@@ -101,11 +101,13 @@ const BINARY_EXTENSIONS = new Set([
   "class",
 ]);
 
+/** 경로의 마지막 이름만 소문자로 본다. 락파일 판별에 쓴다. */
 function fileName(path: string): string {
   const parts = path.split("/");
   return (parts[parts.length - 1] ?? "").toLowerCase();
 }
 
+/** 확장자를 소문자로 꺼낸다. 없으면 빈 문자열이다. */
 function extensionOf(path: string): string {
   const name = fileName(path);
   const index = name.lastIndexOf(".");
@@ -115,11 +117,13 @@ function extensionOf(path: string): string {
   return name.slice(index + 1);
 }
 
+/** 제어 문자를 뺀 표시용 경로다. 비어 있으면 파일 이름 대신 invalid-file을 쓴다. */
 function displayPath(path: string): string {
   const cleaned = path.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, 1024);
   return cleaned.length > 0 ? cleaned : "[invalid-file]";
 }
 
+/** 절대 경로, 상위 디렉터리, 널 문자가 있으면 분석하지 않는다. */
 function isUnsafePath(path: string): boolean {
   if (path.length === 0 || path.length > 1024) {
     return true;
@@ -133,6 +137,7 @@ function isUnsafePath(path: string): boolean {
   return path.split("/").some((part) => part.length === 0 || part === "." || part === "..");
 }
 
+/** 락파일, 생성 파일, vendor, dist, node_modules는 분석에서 뺀다. */
 function isExcludedPath(path: string): boolean {
   const name = fileName(path);
   if (LOCKFILES.has(name) || name.endsWith(".min.js") || name.endsWith(".min.css") || name.endsWith(".map")) {
@@ -144,10 +149,12 @@ function isExcludedPath(path: string): boolean {
   return path.split("/").some((part) => EXCLUDED_DIRECTORIES.has(part.toLowerCase()));
 }
 
+/** 이미지와 바이너리 확장자는 diff를 모델에 넘기지 않는다. */
 function isBinaryPath(path: string): boolean {
   return BINARY_EXTENSIONS.has(extensionOf(path));
 }
 
+/** 본문 없이 건너뛴 이유만 결과에 남긴다. */
 function skipped(path: string, reason: SkipReason, extra?: { sizeBytes?: number; diffBytes?: number }): SkippedFile {
   return {
     path: displayPath(path),
@@ -157,6 +164,7 @@ function skipped(path: string, reason: SkipReason, extra?: { sizeBytes?: number;
   };
 }
 
+/** 리뷰할 파일과 제외 이유를 나눈다. 개수와 크기 제한을 넘긴 diff는 넣지 않는다. */
 export function selectReviewFiles(files: readonly GithubChangedFile[], limits: ReviewLimits): {
   files: ReviewableFile[];
   skipped: SkippedFile[];

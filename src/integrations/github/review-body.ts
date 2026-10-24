@@ -78,18 +78,22 @@ const COPY: Record<ReviewLanguage, ReviewCopy> = {
   },
 };
 
+/** 고른 댓글 언어의 문장 묶음이다. 없으면 한국어다. */
 function copyFor(language: ReviewLanguage | undefined): ReviewCopy {
   return COPY[reviewLanguageFrom(language)];
 }
 
+/** 심각도가 높을수록 앞에 오도록 순서를 숫자로 만든다. */
 function severityRank(severity: Severity): number {
   return SEVERITY_ORDER.indexOf(severity);
 }
 
+/** 백틱과 줄바꿈을 빼 모델 문장이 마크다운 구조를 깨지 않게 한다. */
 function oneLine(value: string): string {
   return value.replace(/`/g, "'").replace(/\s+/g, " ").trim();
 }
 
+/** 요약에 적을 파일과 줄 위치다. */
 function lineLabel(finding: AggregatedFinding): string {
   if (finding.lineStart === finding.lineEnd) {
     return `${finding.filePath}:${finding.lineStart}`;
@@ -97,6 +101,7 @@ function lineLabel(finding: AggregatedFinding): string {
   return `${finding.filePath}:${finding.lineStart}-${finding.lineEnd}`;
 }
 
+/** 인라인 위치를 다시 확인할 때 쓸 파일별 diff 인덱스다. */
 function indexesFor(files: readonly ReviewFile[]): Map<string, ReturnType<typeof indexPatch>> {
   const indexes = new Map<string, ReturnType<typeof indexPatch>>();
   for (const file of files) {
@@ -107,6 +112,7 @@ function indexesFor(files: readonly ReviewFile[]): Map<string, ReturnType<typeof
   return indexes;
 }
 
+/** 인라인 댓글 본문이다. 제목, 설명, 제안만 서버가 조립한다. */
 function inlineBody(finding: AggregatedFinding, copy: ReviewCopy): string {
   const text = [`**${oneLine(finding.title)}** (${copy.severity[finding.severity]})`, "", oneLine(finding.explanation), "", copy.suggestion(oneLine(finding.suggestion))].join("\n");
   if (text.length <= MAX_INLINE_BODY_CHARS) {
@@ -115,6 +121,7 @@ function inlineBody(finding: AggregatedFinding, copy: ReviewCopy): string {
   return `${text.slice(0, MAX_INLINE_BODY_CHARS - 1)}…`;
 }
 
+/** 심각도 medium 이상이고 diff에 줄이 있는 발견만 인라인 후보로 둔다. */
 function eligibleInlineFindings(input: ReviewBodyInput): AggregatedFinding[] {
   const indexes = indexesFor(input.files);
   return input.findings
@@ -136,6 +143,7 @@ function eligibleInlineFindings(input: ReviewBodyInput): AggregatedFinding[] {
     });
 }
 
+/** 인라인 댓글은 개수 상한까지만 고르고, 위치는 evidence가 있는 줄로 좁힌다. */
 export function selectInlineComments(input: ReviewBodyInput): ReviewCommentDraft[] {
   const copy = copyFor(input.language);
   return eligibleInlineFindings(input).slice(0, input.maxInlineComments).map((finding) => {
@@ -153,10 +161,12 @@ export function selectInlineComments(input: ReviewBodyInput): ReviewCommentDraft
   });
 }
 
+/** 요약에 한 발견을 제목, 위치, 설명, 제안으로 적는다. */
 function findingBlock(finding: AggregatedFinding, copy: ReviewCopy): string {
   return [`- **${oneLine(finding.title)}** (\`${lineLabel(finding)}\`)`, `  ${oneLine(finding.explanation)}`, `  ${copy.suggestion(oneLine(finding.suggestion))}`].join("\n");
 }
 
+/** 리뷰 본문이 길이 제한을 넘으면 뒤를 자르고 잘렸다는 문장을 붙인다. */
 function fitBody(text: string, copy: ReviewCopy): string {
   if (text.length <= MAX_BODY_CHARS) {
     return text;
@@ -164,6 +174,7 @@ function fitBody(text: string, copy: ReviewCopy): string {
   return `${text.slice(0, MAX_BODY_CHARS - copy.truncated.length)}${copy.truncated}`;
 }
 
+/** 요약 리뷰와 인라인 댓글 초안을 만든다. 모델 JSON 원문은 올리지 않는다. */
 export function buildReviewPost(input: ReviewBodyInput): ReviewPostDraft {
   const copy = copyFor(input.language);
   const eligibleCount = eligibleInlineFindings(input).length;

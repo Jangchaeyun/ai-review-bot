@@ -18,14 +18,17 @@ export type GithubFetchDeps = {
   onRetry?: (info: { statusCode: number; attempt: number; delayMs: number }) => void;
 };
 
+/** 시간 초과와 취소는 재시도할 네트워크 오류로 본다. */
 function isTimeoutError(error: unknown): boolean {
   return error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
 }
 
+/** 연결 실패와 시간 초과만 재시도 대상이다. */
 function isNetworkError(error: unknown): boolean {
   return error instanceof TypeError || isTimeoutError(error);
 }
 
+/** Retry-After가 있으면 그 시간을 쓰고, 없으면 시도 횟수에 따라 기다린다. 너무 길면 재시도하지 않는다. */
 function retryDelayMs(response: Response, attempt: number, now: number): number | "too-long" {
   const retryAfter = response.headers.get("retry-after");
   if (retryAfter !== null && retryAfter.trim() !== "") {
@@ -44,6 +47,7 @@ function retryDelayMs(response: Response, attempt: number, now: number): number 
   return Math.min(200 * 2 ** (attempt - 1), 5_000);
 }
 
+/** 429, 502, 503, 504와 사용량 제한으로 온 403만 다시 호출한다. */
 function isRetryableStatus(response: Response): boolean {
   if (response.status === 429 || response.status === 502 || response.status === 503 || response.status === 504) {
     return true;
@@ -56,6 +60,7 @@ function isRetryableStatus(response: Response): boolean {
   return remaining === "0" || (retryAfter !== null && retryAfter.trim() !== "");
 }
 
+/** 응답 본문이 상한을 넘으면 내용을 로그에 남기지 않고 실패로 돌린다. */
 async function readLimitedBody(response: Response): Promise<ArrayBuffer> {
   const payload = await response.arrayBuffer();
   if (payload.byteLength > MAX_RESPONSE_BYTES) {
@@ -69,6 +74,7 @@ async function readLimitedBody(response: Response): Promise<ArrayBuffer> {
   return payload;
 }
 
+/** 타임아웃과 재시도가 붙은 GitHub용 fetch다. 3xx 리다이렉트는 따라가지 않는다. */
 export function createGithubFetch(deps: GithubFetchDeps): FetchLike {
   return async (input, init) => {
     let lastTimeout = false;

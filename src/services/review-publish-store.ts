@@ -9,10 +9,12 @@ export interface ReviewPublishStore {
   release(key: string): void;
 }
 
+/** 같은 커밋에 리뷰를 다시 올리지 않기 위한 업무 키다. */
 export function reviewPublishKey(owner: string, repo: string, pullNumber: number, headSha: string): string {
   return `${owner}/${repo}#${pullNumber}@${headSha.toLowerCase()}`;
 }
 
+/** 테스트용 게시 키 저장소다. 키에는 만료가 없다. */
 export class InMemoryReviewPublishStore implements ReviewPublishStore {
   private readonly seen = new Map<string, true>();
 

@@ -16,6 +16,7 @@ export type PullRequestUrl = {
   pullNumber: number;
 };
 
+/** 주소 형식 오류다. 사용자가 넣은 주소 원문은 문장에 넣지 않는다. */
 function invalidPullRequestUrl(): AppError {
   return new AppError({
     message: "Pull Request 주소를 확인해 주세요. github.com/owner/repo/pull/1 또는 owner/repo#1 형식으로 넣을 수 있습니다.",
@@ -25,6 +26,7 @@ function invalidPullRequestUrl(): AppError {
   });
 }
 
+/** owner, repo, PR 번호가 각각 허용 형식일 때만 대상 저장소로 만든다. */
 function fromParts(owner: string, repo: string, numberText: string): PullRequestUrl {
   if (!OWNER_NAME.test(owner) || !REPO_NAME.test(repo) || repo === "." || repo === ".." || !PULL_NUMBER.test(numberText)) {
     throw invalidPullRequestUrl();
@@ -36,6 +38,7 @@ function fromParts(owner: string, repo: string, numberText: string): PullRequest
   };
 }
 
+/** github.com/owner/repo/pull/번호 경로만 읽는다. files, commits, checks 꼬리는 허용한다. */
 function fromPath(pathname: string): PullRequestUrl {
   const parts = pathname.split("/").filter((part) => part.length > 0);
   const owner = parts[0];
@@ -56,6 +59,7 @@ function fromPath(pathname: string): PullRequestUrl {
   return fromParts(owner, repo, numberText);
 }
 
+/** 전체 URL, owner/repo/pull/번호, owner/repo#번호 형식을 같은 대상으로 읽는다. */
 export function parsePullRequestUrl(value: string): PullRequestUrl {
   const trimmed = value.trim();
   const shorthand = /^([A-Za-z0-9](?:[A-Za-z0-9-]{0,38}))\/([A-Za-z0-9_.-]{1,100})#([1-9]\d{0,9})$/.exec(trimmed);

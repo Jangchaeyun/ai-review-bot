@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import type { Env } from "../schemas/env.schema.js";
 import { getHealth } from "../services/health.service.js";
 
+/** GET /health 본문을 만들고 캐시하지 않는다. */
 export function createHealthController(env: Env) {
   return function healthController(_request: Request, res: Response): void {
     res.set("Cache-Control", "no-store");

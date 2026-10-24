@@ -3,6 +3,7 @@
  */
 import type { Request } from "express";
 
+/** 오류 응답에 넣을 경로다. 쿼리스트링은 빼서 입력값이 응답에 다시 나가지 않게 한다. */
 export function requestPath(req: Request): string {
   const path = req.originalUrl.split("?")[0];
   if (path !== undefined && path.length > 0) {

@@ -37,10 +37,12 @@ type SummaryFinding = {
   filePath: string;
 };
 
+/** 요약에 넣을 제목에서 제어 문자를 지우고 길이를 자른다. */
 function clip(value: string, maxLength: number): string {
   return value.replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, maxLength);
 }
 
+/** 게시 결과의 심각도 개수와 제목 몇 개만 작업 기록에 남긴다. */
 export function buildReviewSummary(input: {
   outcome: ReviewSummary["outcome"];
   reason?: ReviewSummary["reason"];

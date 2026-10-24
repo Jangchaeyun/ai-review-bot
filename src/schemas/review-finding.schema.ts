@@ -13,6 +13,7 @@ export type Severity = (typeof SEVERITIES)[number];
 
 const CONTROL_CHARS = /[\u0000-\u001F\u007F]/g;
 
+/** 제어 문자를 지우고 길이를 제한한 문자열 스키마다. 원문을 오류에 다시 넣지 않는다. */
 function boundedText(maxLength: number) {
   return z
     .string()

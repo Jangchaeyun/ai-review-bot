@@ -165,6 +165,7 @@ export function employeeNumberOf(value: string): string | undefined {
   return number;
 }
 
+/** 사원번호 중복 검사용 키다. 영문 대소문자만 구분하지 않는다. */
 export function employeeKey(value: string): string {
   return value.toLocaleLowerCase("en-US");
 }
@@ -180,10 +181,12 @@ export function departmentOf(value: string): string | undefined {
   return name;
 }
 
+/** 저장된 가입 구분이 회사 대표 또는 사원일 때만 읽는다. 예전 행의 빈 값은 생략한다. */
 function signupPositionOf(value: unknown): SignupPosition | undefined {
   return value === "representative" || value === "employee" ? value : undefined;
 }
 
+/** 사용자 행에 넣을 사원번호와 선택 부서다. */
 function personOf(input: PersonProfile): Pick<AccountUser, "employeeNumber" | "department"> {
   return {
     employeeNumber: input.employeeNumber,
@@ -191,6 +194,7 @@ function personOf(input: PersonProfile): Pick<AccountUser, "employeeNumber" | "d
   };
 }
 
+/** 회사 대표 가입에 필요한 회사 이름, 사업자등록번호, 대표자가 모두 있을 때만 프로필을 만든다. */
 function companyProfileOf(input: RegisterInput): CompanyProfile | undefined {
   if (input.companyName === undefined || input.businessNumber === undefined || input.representative === undefined) {
     return undefined;
@@ -198,6 +202,7 @@ function companyProfileOf(input: RegisterInput): CompanyProfile | undefined {
   return { name: input.companyName, businessNumber: input.businessNumber, representative: input.representative };
 }
 
+/** 혼동하기 쉬운 문자를 뺀 10자리 초대 코드를 만든다. */
 export function newInviteCode(): string {
   const bytes = randomBytes(10);
   let code = "";
@@ -207,6 +212,7 @@ export function newInviteCode(): string {
   return code;
 }
 
+/** 공백과 하이픈을 뺀 10자리 대문자 코드만 인정한다. */
 export function normalizeInviteCode(value: string): string | undefined {
   const code = value.replace(/[\s-]/g, "").toUpperCase();
   if (!/^[A-Z2-9]{10}$/.test(code)) {
@@ -215,6 +221,7 @@ export function normalizeInviteCode(value: string): string | undefined {
   return code;
 }
 
+/** 초대 코드를 같은 길이일 때만 비교한다. 틀린 코드로 저장된 코드의 길이를 짐작하지 못하게 한다. */
 function invitesMatch(stored: string, given: string): boolean {
   const normalized = normalizeInviteCode(given);
   if (normalized === undefined) {
@@ -232,6 +239,7 @@ type MemoryUser = AccountRecord & { usernameKey: string };
 type MemorySession = { userId: string; expiresAt: number };
 type MemoryCompany = CompanySnapshot & { id: string };
 
+/** 테스트용 메모리 계정 저장소다. 프로세스가 끝나면 회사와 세션이 사라진다. */
 export function createMemoryAccountStore(now: () => number = Date.now): AccountStore {
   const users = new Map<string, MemoryUser>();
   const sessions = new Map<string, MemorySession>();
@@ -424,6 +432,7 @@ export function createMemoryAccountStore(now: () => number = Date.now): AccountS
   };
 }
 
+/** SQLite 고유 제약 위반을 사용자 이름, 사원번호, 회사 중복으로 나눈다. */
 function registerFailure(error: unknown): "duplicate" | "employee-taken" | "company-exists" | undefined {
   if (!isUniqueViolation(error)) {
     return undefined;
@@ -438,6 +447,7 @@ function registerFailure(error: unknown): "duplicate" | "employee-taken" | "comp
   return "company-exists";
 }
 
+/** node:sqlite가 고유 제약으로 던진 오류인지 본다. */
 function isUniqueViolation(error: unknown): boolean {
   if (typeof error !== "object" || error === null) {
     return false;
@@ -447,6 +457,7 @@ function isUniqueViolation(error: unknown): boolean {
   return code.includes("SQLITE_CONSTRAINT") || message.includes("UNIQUE constraint failed");
 }
 
+/** 이미 있는 열을 다시 추가하면 넘어간다. 예전 데이터베이스에 열을 잇는 용도다. */
 function addColumn(db: DatabaseSync, statement: string): void {
   try {
     db.exec(statement);
@@ -458,6 +469,7 @@ function addColumn(db: DatabaseSync, statement: string): void {
   }
 }
 
+/** 사용자 행에서 비어 있는 구분, 사원번호, 부서는 빼서 예전 행과 새 행을 같은 형태로 읽는다. */
 function readAccountUser(row: unknown): AccountUser | undefined {
   if (typeof row !== "object" || row === null) {
     return undefined;
@@ -490,6 +502,7 @@ function readAccountUser(row: unknown): AccountUser | undefined {
   };
 }
 
+/** 로그인 확인에 쓸 사용자와 비밀번호 해시를 읽는다. 해시는 응답으로 나가지 않는다. */
 function readUserRow(row: unknown): AccountRecord | undefined {
   const user = readAccountUser(row);
   if (user === undefined || typeof row !== "object" || row === null) {
@@ -502,6 +515,7 @@ function readUserRow(row: unknown): AccountRecord | undefined {
   return { user, passwordHash };
 }
 
+/** 회사 행을 읽는다. 사업자등록번호가 검증을 통과하지 않으면 빈 문자열로 둔다. */
 function readCompany(row: unknown): CompanySnapshot & { id: string } | undefined {
   if (typeof row !== "object" || row === null) {
     return undefined;
@@ -524,6 +538,7 @@ function readCompany(row: unknown): CompanySnapshot & { id: string } | undefined
   return { id, name, inviteCode, registered, businessNumber, representative };
 }
 
+/** COUNT 조회 결과에서 숫자만 꺼낸다. 행이 없으면 0이다. */
 function countOf(row: unknown): number {
   if (typeof row !== "object" || row === null || !("count" in row)) {
     return 0;

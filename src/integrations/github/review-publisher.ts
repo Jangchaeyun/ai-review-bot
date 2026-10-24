@@ -81,6 +81,7 @@ export type ReviewPublisherDeps = {
   now?: () => number;
 };
 
+/** 로그에 남을 수 있는 토큰과 키 문장을 가리고 길이를 제한한다. */
 function sanitizeLogMessage(message: unknown): string {
   const text = typeof message === "string" ? message : "";
   return text
@@ -92,6 +93,7 @@ function sanitizeLogMessage(message: unknown): string {
     .slice(0, 180);
 }
 
+/** Octokit이 cause로 감싼 앱 오류를 꺼낸다. */
 function unwrapAppError(error: unknown): AppError | undefined {
   let current: unknown = error;
   for (let depth = 0; depth < 5; depth += 1) {
@@ -106,6 +108,7 @@ function unwrapAppError(error: unknown): AppError | undefined {
   return undefined;
 }
 
+/** 게시 응답의 HTTP 상태다. */
 function statusOf(error: unknown): number | undefined {
   if (typeof error === "object" && error !== null && "status" in error && typeof error.status === "number") {
     return error.status;
@@ -113,6 +116,7 @@ function statusOf(error: unknown): number | undefined {
   return undefined;
 }
 
+/** 게시 실패를 재시도 여부가 있는 앱 오류로 나눈다. 422는 재시도하지 않는다. */
 function publishFailure(error: unknown): AppError {
   const appError = unwrapAppError(error);
   if (appError !== undefined) {
@@ -167,10 +171,12 @@ function publishFailure(error: unknown): AppError {
   });
 }
 
+/** GitHub가 인라인 위치를 거절한 422인지 본다. 이때는 요약만 다시 올린다. */
 function isUnprocessable(error: unknown): boolean {
   return publishFailure(error).code === "GITHUB_UNPROCESSABLE";
 }
 
+/** 게시 대상 저장소, PR 번호, 설치 ID, head SHA 형식을 확인한다. */
 function assertTarget(input: ReviewPublishInput): void {
   if (!REPOSITORY_NAME.test(input.owner) || !REPOSITORY_NAME.test(input.repo)) {
     throw new AppError({ message: "저장소 이름이 올바르지 않습니다.", code: "INVALID_REPOSITORY", statusCode: 400 });
@@ -186,6 +192,7 @@ function assertTarget(input: ReviewPublishInput): void {
   }
 }
 
+/** 설치 토큰으로 COMMENT 리뷰를 올린다. 같은 SHA의 성공 게시는 다시 하지 않는다. */
 export function createReviewPublisher(deps: ReviewPublisherDeps): ReviewPublisher {
   const privateKey = normalizePrivateKey(deps.privateKey);
   const store = deps.store ?? new InMemoryReviewPublishStore();
@@ -309,6 +316,7 @@ export function createReviewPublisher(deps: ReviewPublisherDeps): ReviewPublishe
   };
 }
 
+/** 인라인이 거절되면 댓글 없이 요약만 다시 게시한다. */
 async function postReview(
   api: Octokit,
   input: ReviewPublishInput,
@@ -327,6 +335,7 @@ async function postReview(
   }
 }
 
+/** GitHub pull request review API에 본문과 인라인 댓글을 보낸다. */
 async function createReview(api: Octokit, input: ReviewPublishInput, body: string, comments: readonly ReviewCommentDraft[]): Promise<number> {
   const base = {
     owner: input.owner,

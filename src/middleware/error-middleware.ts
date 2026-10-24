@@ -11,6 +11,7 @@ import { requestPath } from "../utils/request-path.js";
 
 const GENERIC_SERVER_MESSAGE = "요청을 처리하지 못했습니다.";
 
+/** Express JSON 파서가 본문을 읽지 못했을 때의 400이다. */
 function isJsonParseError(error: unknown): boolean {
   if (!(error instanceof SyntaxError)) {
     return false;
@@ -21,6 +22,7 @@ function isJsonParseError(error: unknown): boolean {
   return status === 400 || type === "entity.parse.failed";
 }
 
+/** 본문이 허용 크기를 넘긴 413이다. */
 function isPayloadTooLarge(error: unknown): boolean {
   if (typeof error !== "object" || error === null) {
     return false;
@@ -102,6 +104,7 @@ function publicError(error: unknown, path: string): { statusCode: number; body: 
   };
 }
 
+/** 앱의 마지막 오류 처리다. 로그에는 코드를 남기고 응답에는 공개해도 되는 문장만 보낸다. */
 export function errorMiddleware(logger: Logger): ErrorRequestHandler {
   return (error: unknown, req: Request, res: Response, next: NextFunction): void => {
     if (res.headersSent) {

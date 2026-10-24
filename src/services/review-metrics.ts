@@ -7,6 +7,7 @@ export type ReviewMetricSnapshot = {
   failureRate: number;
 };
 
+/** 이 프로세스에서 끝난 리뷰 건수와 실패율을 센다. */
 export class InMemoryReviewMetrics {
   private handled = 0;
   private failed = 0;

@@ -26,6 +26,7 @@ function decodeSignature(signatureHeader: string): Buffer | undefined {
   return decoded;
 }
 
+/** raw body의 HMAC-SHA256과 헤더 서명이 같은 길이일 때만 비교한다. */
 export function verifyGithubSignature(
   rawBody: Buffer,
   signatureHeader: string | undefined,

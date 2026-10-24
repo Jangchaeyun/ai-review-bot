@@ -5,6 +5,7 @@ import type { NextFunction, Request, Response } from "express";
 import { errorResponseSchema } from "../schemas/error-response.schema.js";
 import { requestPath } from "../utils/request-path.js";
 
+/** 없는 경로에 404를 보낸다. 이미 응답을 보냈으면 다시 쓰지 않는다. */
 export function notFoundMiddleware(req: Request, res: Response, next: NextFunction): void {
   if (res.headersSent) {
     next();

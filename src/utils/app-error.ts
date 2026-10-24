@@ -10,6 +10,7 @@ export type AppErrorOptions = {
   cause?: unknown;
 };
 
+/** code, HTTP 상태, 재시도 가능 여부, 응답 공개 여부를 한 오류로 담는다. */
 export class AppError extends Error {
   readonly code: string;
   readonly statusCode: number;

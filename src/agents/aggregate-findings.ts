@@ -1,5 +1,6 @@
 /**
  * 같은 파일에서 줄이 겹치고 요지가 같은 발견을 하나로 합친다. 더 높은 심각도를 남긴다.
+ * 요지는 정규화한 제목이 같거나, 제목은 달라도 정규화한 제안이 같으면 같다.
  * 이 통합은 모델이 아니라 결정적 코드다.
  */
 import { AGENT_IDS, type AgentId, type ReviewFinding, type Severity } from "../schemas/review-finding.schema.js";
@@ -25,20 +26,32 @@ const CATEGORY_RANK: Record<AgentId, number> = {
   security: 3,
 };
 
-function normalizeTitle(title: string): string {
-  return title.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+/** 제목과 제안에서 구두점과 대소문자를 빼 같은 요지인지 비교할 문자열을 만든다. */
+function normalizeText(value: string): string {
+  return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 
+/** 같은 파일에서 제목이 같거나, 제목은 달라도 제안이 같으면 같은 요지로 본다. */
 function sameGist(left: ReviewFinding, right: ReviewFinding): boolean {
-  const leftTitle = normalizeTitle(left.title);
-  const rightTitle = normalizeTitle(right.title);
-  return left.filePath === right.filePath && leftTitle.length > 0 && leftTitle === rightTitle;
+  if (left.filePath !== right.filePath) {
+    return false;
+  }
+  const leftTitle = normalizeText(left.title);
+  const rightTitle = normalizeText(right.title);
+  if (leftTitle.length > 0 && leftTitle === rightTitle) {
+    return true;
+  }
+  const leftSuggestion = normalizeText(left.suggestion);
+  const rightSuggestion = normalizeText(right.suggestion);
+  return leftSuggestion.length > 0 && leftSuggestion === rightSuggestion;
 }
 
+/** 두 발견의 줄 범위가 한 줄이라도 겹치면 참이다. */
 function overlaps(left: ReviewFinding, right: ReviewFinding): boolean {
   return left.lineStart <= right.lineEnd && right.lineStart <= left.lineEnd;
 }
 
+/** 합칠 때 더 높은 심각도를 남긴다. 같으면 확신, 그다음 보안 쪽 항목을 남긴다. */
 function prefer(left: SourcedFinding, right: SourcedFinding): SourcedFinding {
   const severityDelta = SEVERITY_RANK[left.severity] - SEVERITY_RANK[right.severity];
   if (severityDelta !== 0) {
@@ -50,10 +63,12 @@ function prefer(left: SourcedFinding, right: SourcedFinding): SourcedFinding {
   return CATEGORY_RANK[left.category] >= CATEGORY_RANK[right.category] ? left : right;
 }
 
+/** 출처 에이전트를 품질, 보안, 성능 순서로 정렬한다. */
 function sortSources(sources: readonly AgentId[]): AgentId[] {
   return AGENT_IDS.filter((id) => sources.includes(id));
 }
 
+/** 겹치는 같은 요지를 하나로 합치고, 심각도가 높은 순으로 돌려준다. */
 export function aggregateFindings(findings: readonly SourcedFinding[]): AggregatedFinding[] {
   const parent = findings.map((_, index) => index);
 

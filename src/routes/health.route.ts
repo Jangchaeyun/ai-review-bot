@@ -4,6 +4,7 @@ import { createHealthController } from "../controllers/health.controller.js";
 import type { Env } from "../schemas/env.schema.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
+/** GET /health를 앱에 붙인다. */
 export function createHealthRouter(env: Env): Router {
   const router = Router();
   router.get("/", asyncHandler(createHealthController(env)));

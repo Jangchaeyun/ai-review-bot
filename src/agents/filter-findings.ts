@@ -24,6 +24,7 @@ export type FilterResult = {
   droppedCount: number;
 };
 
+/** 설명과 제안에 있는 URL은 입력 diff에 있던 것만 남긴다. */
 function stripUnknownUrls(text: string, allowed: string): string {
   return text
     .replace(URL_PATTERN, (url) => (allowed.includes(url) ? url : ""))
@@ -31,6 +32,7 @@ function stripUnknownUrls(text: string, allowed: string): string {
     .trim();
 }
 
+/** 보안 발견의 확신이 0.5 미만이면 심각도를 low로 낮추고 확신할 수 없다고 적는다. */
 function withSecurityUncertainty(finding: ReviewFinding, language: ReviewLanguage): ReviewFinding {
   if (finding.category !== "security" || finding.confidence >= SECURITY_CONFIDENCE_FLOOR) {
     return finding;
@@ -48,6 +50,7 @@ function withSecurityUncertainty(finding: ReviewFinding, language: ReviewLanguag
   };
 }
 
+/** diff에 없는 경로, 줄, 근거를 버리고 남은 발견만 게시 후보로 둔다. */
 export function filterFindings(
   findings: readonly ReviewFinding[],
   files: readonly ReviewFile[],

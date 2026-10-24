@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 
 const ENV_KEY = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
+/** .env가 없으면 넘어가고, 이미 설정된 환경변수는 파일 값으로 바꾸지 않는다. */
 export function loadDotEnv(path = ".env"): void {
   let text: string;
   try {

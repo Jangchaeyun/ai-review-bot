@@ -43,6 +43,7 @@ export type ReviewRunner = {
   run(input: ReviewAgentInput): Promise<ReviewRunResult>;
 };
 
+/** 에이전트 결과를 로그용 보고로 줄인다. 발견 본문은 넣지 않는다. */
 function toReport(id: ReviewAgent["id"], result: AgentResult): AgentReport {
   if (result.status === "failed") {
     return {
@@ -62,6 +63,7 @@ function toReport(id: ReviewAgent["id"], result: AgentResult): AgentReport {
   };
 }
 
+/** 세 에이전트를 병렬로 돌리고, 성공한 발견만 결정적으로 합친다. */
 export function createReviewRunner(agents: readonly ReviewAgent[], logger: Logger): ReviewRunner {
   return {
     async run(input: ReviewAgentInput): Promise<ReviewRunResult> {

@@ -46,6 +46,7 @@ export type CreateLoggerOptions = {
   destination?: DestinationStream;
 };
 
+/** 서비스 이름만 기본 필드에 두고, 비밀 경로는 [Redacted]로 가린 로거를 만든다. */
 export function createLogger(env: Env, options?: CreateLoggerOptions): Logger {
   const loggerOptions = {
     level: options?.level ?? env.LOG_LEVEL,

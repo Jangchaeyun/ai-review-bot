@@ -49,6 +49,7 @@ const PROMPTS: Record<AgentId, string> = {
   performance: PERFORMANCE_SYSTEM_PROMPT,
 };
 
+/** 에이전트 실패를 로그에 남길 코드로 좁힌다. 오류 문장은 넣지 않는다. */
 function failureCode(error: unknown): string {
   if (error instanceof AppError) {
     return error.code;
@@ -56,6 +57,7 @@ function failureCode(error: unknown): string {
   return "LLM_BAD_RESPONSE";
 }
 
+/** 한 관점의 에이전트다. 예산이 넘는 diff는 청크로 나눠 같은 시스템 프롬프트로 호출한다. */
 export function createReviewAgent(id: AgentId, provider: LlmProvider, maxInputChars: number): ReviewAgent {
   return {
     id,
@@ -107,6 +109,7 @@ export function createReviewAgent(id: AgentId, provider: LlmProvider, maxInputCh
   };
 }
 
+/** 품질, 보안, 성능 에이전트를 같은 공급자와 입력 예산으로 만든다. */
 export function createReviewAgents(provider: LlmProvider, maxInputChars: number): ReviewAgent[] {
   return [
     createReviewAgent("quality", provider, maxInputChars),

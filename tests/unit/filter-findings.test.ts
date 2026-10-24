@@ -158,10 +158,52 @@ describe("aggregateFindings", () => {
       source: "quality",
     };
     const otherGist: SourcedFinding = {
-      ...finding({ title: "다른 문제입니다", category: "performance" }),
+      ...finding({
+        title: "다른 문제입니다",
+        category: "performance",
+        suggestion: "반복해서 같은 값을 계산하지 않습니다.",
+      }),
       source: "performance",
     };
     expect(aggregateFindings([first, otherLines, otherGist])).toHaveLength(3);
+  });
+
+  it("merges overlapping findings that propose the same change under different titles", () => {
+    const high: SourcedFinding = {
+      ...finding({
+        category: "quality",
+        severity: "high",
+        title: "할인액 계산 오류",
+        filePath: "samples/discount.js",
+        lineStart: 3,
+        lineEnd: 3,
+        evidence: "return price - price * percent;",
+        explanation: "percent를 100으로 나누지 않아 할인액이 커지는 문제가 발생합니다.",
+        suggestion: "percent를 100으로 나누어 계산하도록 수정하세요.",
+      }),
+      source: "quality",
+    };
+    const medium: SourcedFinding = {
+      ...finding({
+        category: "performance",
+        severity: "medium",
+        title: "계산에서 단위를 빠뜨림",
+        filePath: "samples/discount.js",
+        lineStart: 3,
+        lineEnd: 3,
+        evidence: "return price - price * percent;",
+        explanation: "percent를 100으로 나누지 않아 할인액이 커지는 문제가 있습니다.",
+        suggestion: "percent를 100으로 나누어 계산하도록 수정하세요.",
+      }),
+      source: "performance",
+    };
+    const merged = aggregateFindings([medium, high]);
+    expect(merged).toHaveLength(1);
+    expect(merged[0]).toMatchObject({
+      severity: "high",
+      title: "할인액 계산 오류",
+      sources: ["quality", "performance"],
+    });
   });
 
   it("returns an empty list when there is nothing to merge", () => {

@@ -49,10 +49,12 @@ export type OpenAiProviderDeps = {
   onRetry?: (info: { statusCode: number; attempt: number; delayMs: number }) => void;
 };
 
+/** LLM 호출의 시간 초과와 취소다. */
 function isTimeoutError(error: unknown): boolean {
   return error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
 }
 
+/** Retry-After가 있으면 그 시간을 쓰고, 상한을 넘으면 재시도하지 않는다. */
 function retryDelayMs(response: Response, attempt: number, now: number): number | "too-long" {
   const retryAfter = response.headers.get("retry-after");
   if (retryAfter !== null && retryAfter.trim() !== "") {
@@ -70,10 +72,12 @@ function retryDelayMs(response: Response, attempt: number, now: number): number 
   return Math.min(200 * 2 ** (attempt - 1), 5_000);
 }
 
+/** 429, 502, 503, 504만 다시 호출한다. 인증 실패는 재시도하지 않는다. */
 function isRetryableStatus(status: number): boolean {
   return status === 429 || status === 502 || status === 503 || status === 504;
 }
 
+/** HTTP 상태를 앱 오류로 바꾼다. 응답 본문과 키는 메시지에 넣지 않는다. */
 function statusError(status: number): AppError {
   if (status === 401) {
     return new AppError({
@@ -117,6 +121,7 @@ function statusError(status: number): AppError {
   });
 }
 
+/** LLM 응답이 너무 크면 본문을 읽지 않고 실패로 돌린다. */
 async function readLimitedBody(response: Response): Promise<string> {
   const payload = await response.arrayBuffer();
   if (payload.byteLength > MAX_RESPONSE_BYTES) {
@@ -130,6 +135,7 @@ async function readLimitedBody(response: Response): Promise<string> {
   return new TextDecoder().decode(payload);
 }
 
+/** OpenAI 호환 Chat Completions를 fetch로 호출하는 공급자다. */
 export function createOpenAiCompatibleProvider(deps: OpenAiProviderDeps): LlmProvider {
   const fetchImpl = deps.fetchImpl ?? fetch;
   const sleep = deps.sleep ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));

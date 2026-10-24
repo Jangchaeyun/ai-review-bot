@@ -12,6 +12,7 @@ export interface ReviewJobQueue {
 
 export type ReviewJobHandler = (job: ReviewJob) => void | Promise<void>;
 
+/** 큐에 넣은 작업의 식별자만 로그한다. 제목과 diff는 남기지 않는다. */
 export function logAcceptedReviewJob(logger: Logger): ReviewJobHandler {
   return (job) => {
     logger.info(
@@ -29,6 +30,7 @@ export function logAcceptedReviewJob(logger: Logger): ReviewJobHandler {
   };
 }
 
+/** 테스트용 큐다. 핸들러는 setImmediate로 호출한 뒤 응답 다음에 실행된다. */
 export function createInMemoryReviewJobQueue(handler: ReviewJobHandler, logger: Logger): ReviewJobQueue {
   const inflight = new Set<Promise<void>>();
   return {

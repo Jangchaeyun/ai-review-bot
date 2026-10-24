@@ -9,6 +9,7 @@ export interface DeliveryStore {
   release(deliveryId: string): void;
 }
 
+/** 테스트용 딜리버리 저장소다. 만료된 키는 다시 새 이벤트로 받는다. */
 export class InMemoryDeliveryStore implements DeliveryStore {
   private readonly seen = new Map<string, number>();
 

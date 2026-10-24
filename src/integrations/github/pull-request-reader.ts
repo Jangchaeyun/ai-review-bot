@@ -117,10 +117,12 @@ export type PullRequestReader = {
   read(query: PullRequestQuery): Promise<PullRequestReadResult>;
 };
 
+/** PR 제목과 본문에서 제어 문자를 지우고 최대 길이만 남긴다. */
 function sanitizeText(value: string, maxLength: number): string {
   return value.replace(/[\u0000-\u001F\u007F]/g, "").slice(0, maxLength);
 }
 
+/** Octokit이 cause로 감싼 앱 오류를 꺼낸다. */
 function unwrapAppError(error: unknown): AppError | undefined {
   let current: unknown = error;
   for (let depth = 0; depth < 5; depth += 1) {
@@ -135,6 +137,7 @@ function unwrapAppError(error: unknown): AppError | undefined {
   return undefined;
 }
 
+/** 조회 실패를 인증, 권한, 없음, 일시 오류로 나눈다. diff는 오류 문장에 넣지 않는다. */
 function githubFailure(error: unknown): AppError {
   const appError = unwrapAppError(error);
   if (appError !== undefined) {
@@ -208,6 +211,7 @@ function githubFailure(error: unknown): AppError {
   });
 }
 
+/** Octokit 로그에 토큰이나 키가 남지 않도록 문장을 가린다. */
 function sanitizeLogMessage(message: unknown): string {
   const text = typeof message === "string" ? message : "";
   return text
@@ -218,6 +222,7 @@ function sanitizeLogMessage(message: unknown): string {
     .replace(/-----BEGIN[\s\S]*?-----END [^-]+-----/g, "[Redacted]");
 }
 
+/** Octokit 디버그 로그는 남기지 않는다. diff와 토큰이 섞이지 않게 하기 위해서다. */
 function octokitLog(logger: Logger) {
   return {
     debug: () => undefined,
@@ -231,6 +236,7 @@ function octokitLog(logger: Logger) {
   };
 }
 
+/** 조회할 저장소 이름, PR 번호, 설치 ID 형식을 확인한다. */
 function assertQuery(query: PullRequestQuery): PullRequestQuery {
   if (!REPOSITORY_NAME.test(query.owner) || !REPOSITORY_NAME.test(query.repo)) {
     throw new AppError({
@@ -256,6 +262,7 @@ function assertQuery(query: PullRequestQuery): PullRequestQuery {
   return query;
 }
 
+/** 페이지 링크는 Link 헤더 문자열로만 읽는다. 응답 URL을 따라 요청하지 않는다. */
 function linkHeader(headers: unknown): string {
   if (typeof headers !== "object" || headers === null || !("link" in headers)) {
     return "";
@@ -263,6 +270,7 @@ function linkHeader(headers: unknown): string {
   return typeof headers.link === "string" ? headers.link : "";
 }
 
+/** GitHub JSON이 스키마와 다르면 본문을 로그에 남기지 않고 실패로 돌린다. */
 function badResponse(): AppError {
   return new AppError({
     message: "GitHub 응답 형식이 올바르지 않습니다.",
@@ -272,6 +280,7 @@ function badResponse(): AppError {
   });
 }
 
+/** 설치 토큰으로 PR 메타데이터와 변경 파일을 읽는다. 권한은 읽기만 요청한다. */
 export function createPullRequestReader(deps: PullRequestReaderDeps): PullRequestReader {
   const privateKey = normalizePrivateKey(deps.privateKey);
   const fetchImpl = createGithubFetch({
@@ -351,6 +360,7 @@ export function createPullRequestReader(deps: PullRequestReaderDeps): PullReques
   };
 }
 
+/** 한 설치 토큰으로 PR, 트리, 변경 파일을 읽고 리뷰 범위로 좁힌다. */
 async function readWithClient(api: Octokit, query: PullRequestQuery, limits: ReviewLimits): Promise<PullRequestReadResult> {
   const pullResponse = await api.rest.pulls.get({
     owner: query.owner,
@@ -424,6 +434,7 @@ async function readWithClient(api: Octokit, query: PullRequestQuery, limits: Rev
   };
 }
 
+/** 변경 파일 목록을 페이지 단위로 읽는다. 페이지 상한을 넘으면 불완전으로 표시한다. */
 async function listAllFiles(api: Octokit, query: PullRequestQuery): Promise<{ files: unknown[]; incomplete: boolean }> {
   const files: unknown[] = [];
   for (let page = 1; page <= 30; page += 1) {
@@ -447,6 +458,7 @@ async function listAllFiles(api: Octokit, query: PullRequestQuery): Promise<{ fi
   return { files, incomplete: true };
 }
 
+/** 트리 응답에서 파일 경로별 크기를 모은다. 크기 제한 판단에 쓴다. */
 function blobSizes(entries: ReadonlyArray<{ path?: string | undefined; type?: string | undefined; size?: number | undefined }>): Map<string, number> {
   const sizes = new Map<string, number>();
   for (const entry of entries) {
@@ -457,6 +469,7 @@ function blobSizes(entries: ReadonlyArray<{ path?: string | undefined; type?: st
   return sizes;
 }
 
+/** 건너뛴 이유별 개수다. 로그에는 본문 대신 이 개수만 남긴다. */
 function countSkipped(skipped: readonly SkippedFile[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const file of skipped) {

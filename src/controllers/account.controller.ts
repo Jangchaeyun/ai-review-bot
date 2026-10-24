@@ -59,6 +59,7 @@ export type AccountControllerDeps = {
   now?: () => number;
 };
 
+/** 이름 규칙에 맞지 않을 때 쓴다. 사용자가 넣은 이름은 문장에 다시 적지 않는다. */
 function invalidUsername(): AppError {
   return new AppError({
     message: "사용자 이름은 2자에서 32자 사이여야 합니다. 한글, 영문, 숫자, _, - 만 쓸 수 있습니다.",
@@ -68,6 +69,7 @@ function invalidUsername(): AppError {
   });
 }
 
+/** 비밀번호가 8자보다 짧을 때 쓴다. 입력한 비밀번호는 문장에 넣지 않는다. */
 function invalidPassword(): AppError {
   return new AppError({
     message: "비밀번호는 8자 이상이어야 합니다.",
@@ -77,6 +79,7 @@ function invalidPassword(): AppError {
   });
 }
 
+/** 사원번호 형식 오류다. 입력한 번호는 문장에 다시 적지 않는다. */
 function invalidEmployee(): AppError {
   return new AppError({
     message: "사원번호는 1자에서 20자입니다. 한글, 영문, 숫자, 하이픈만 쓸 수 있습니다.",
@@ -86,6 +89,7 @@ function invalidEmployee(): AppError {
   });
 }
 
+/** 부서가 고정 목록에 없을 때 쓴다. */
 function invalidDepartment(): AppError {
   return new AppError({
     message: "부서를 목록에서 골라 주세요.",
@@ -95,6 +99,7 @@ function invalidDepartment(): AppError {
   });
 }
 
+/** 사업자등록번호 검증이나 대표자 이름이 맞지 않을 때 쓴다. 번호 원문은 넣지 않는다. */
 function invalidCompanyProfile(): AppError {
   return new AppError({
     message: "사업자등록번호 10자리와 대표자 이름을 확인해 주세요.",
@@ -104,6 +109,7 @@ function invalidCompanyProfile(): AppError {
   });
 }
 
+/** 회사 이름과 초대 코드 변경은 관리자만 할 수 있다. */
 function companyForbidden(): AppError {
   return new AppError({
     message: "회사 설정은 관리자만 바꿀 수 있습니다.",
@@ -113,6 +119,7 @@ function companyForbidden(): AppError {
   });
 }
 
+/** 가입 저장소가 거절한 이유를 공개 오류로 바꾼다. 초대 코드와 입력값은 넣지 않는다. */
 function registerError(result: Exclude<RegisterResult, { status: "created" }>): AppError {
   if (result.status === "duplicate") {
     return new AppError({
@@ -173,6 +180,7 @@ function registerError(result: Exclude<RegisterResult, { status: "created" }>): 
   });
 }
 
+/** 세션 응답에 넣을 사용자다. 회사가 아직 등록되지 않았으면 회사 이름을 비운다. */
 function publicUser(user: AccountUser, accounts: AccountStore): {
   username: string;
   role: AccountUser["role"];
@@ -192,6 +200,7 @@ function publicUser(user: AccountUser, accounts: AccountStore): {
   };
 }
 
+/** 부서를 비우면 생략하고, 목록에 없는 값이면 가입 전체를 거절하도록 undefined를 돌려준다. */
 function optionalDepartment(value: string | undefined): { department: string } | { department?: undefined } | undefined {
   if (value === undefined || value.trim() === "") {
     return {};
@@ -203,10 +212,12 @@ function optionalDepartment(value: string | undefined): { department: string } |
   return { department };
 }
 
+/** 사원번호는 항상 넣고, 부서는 골랐을 때만 넣는다. */
 function personProfile(employeeNumber: string, department: string | undefined): PersonProfile {
   return department === undefined ? { employeeNumber } : { employeeNumber, department };
 }
 
+/** 로그인 실패 문장이다. 이름과 비밀번호 중 무엇이 틀렸는지는 구분하지 않는다. */
 function authFailed(): AppError {
   return new AppError({
     message: "사용자 이름 또는 비밀번호가 올바르지 않습니다.",
@@ -216,6 +227,7 @@ function authFailed(): AppError {
   });
 }
 
+/** 쿠키의 세션 토큰 해시로 현재 사용자를 찾는다. 토큰 원문은 저장소에 묻지 않는다. */
 export function currentUser(req: Request, accounts: AccountStore): AccountUser | undefined {
   const token = readSessionToken(req.header("cookie"));
   if (token === undefined) {
@@ -224,6 +236,7 @@ export function currentUser(req: Request, accounts: AccountStore): AccountUser |
   return accounts.findSession(hashSessionToken(token));
 }
 
+/** 세션을 저장하고 HttpOnly 쿠키를 응답에 붙인다. */
 function startSession(res: Response, accounts: AccountStore, user: AccountUser, now: number): void {
   const token = newSessionToken();
   accounts.createSession(user.id, hashSessionToken(token), now + SESSION_TTL_MS);
@@ -232,6 +245,7 @@ function startSession(res: Response, accounts: AccountStore, user: AccountUser, 
   res.set("cache-control", "no-store");
 }
 
+/** 가입, 로그인, 회사, 초대 코드, 사원 정보 핸들러를 만든다. */
 export function createAccountController(deps: AccountControllerDeps) {
   const now = (): number => deps.now?.() ?? Date.now();
 

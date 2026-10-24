@@ -2,6 +2,7 @@
 import type { Env } from "../schemas/env.schema.js";
 import { healthResponseSchema, type HealthResponse } from "../schemas/health.schema.js";
 
+/** 프로세스가 살아 있다는 응답만 만든다. 의존성이나 비밀은 넣지 않는다. */
 export function getHealth(env: Env): HealthResponse {
   return healthResponseSchema.parse({
     status: "ok",

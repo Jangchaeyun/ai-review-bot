@@ -40,6 +40,7 @@ function requireLogin(req: Request, deps: ConsoleControllerDeps) {
   return user;
 }
 
+/** 페이지, 작업 목록, 수동 리뷰 요청 핸들러를 만든다. */
 export function createConsoleController(deps: ConsoleControllerDeps) {
   return {
     page(_req: Request, res: Response): void {

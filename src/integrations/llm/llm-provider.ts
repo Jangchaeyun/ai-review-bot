@@ -23,6 +23,7 @@ export const EMPTY_LLM_USAGE: LlmUsage = Object.freeze({
   totalTokens: 0,
 });
 
+/** 청크별 토큰 사용량을 더한다. 사용량이 없으면 왼쪽 값을 그대로 둔다. */
 export function addLlmUsage(left: LlmUsage, right: LlmUsage | undefined): LlmUsage {
   if (right === undefined) {
     return left;

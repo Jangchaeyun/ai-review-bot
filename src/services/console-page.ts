@@ -351,6 +351,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       duplicate: "같은 커밋에는 이미 리뷰가 있습니다.",
     };
 
+    // 카드 링크는 github.com의 owner/repo/pull/번호만 만든다. 리뷰 번호가 있으면 그 댓글로 간다.
     function safePullUrl(job) {
       const safeName = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
       if (!safeName.test(job.owner) || !safeName.test(job.repo) || !Number.isInteger(job.pullNumber)) {
@@ -364,6 +365,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       return base;
     }
 
+    // 심각도별 개수를 한 줄로 만든다. 없으면 지적이 없다고 보여 준다.
     function countLine(summary) {
       const parts = [];
       for (const key of ["critical", "high", "medium", "low"]) {
@@ -374,6 +376,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       return parts.length === 0 ? "지적 없음" : parts.join(" · ");
     }
 
+    // 작업 상태와 게시 결과를 카드에 쓸 문장으로 바꾼다.
     function describe(job) {
       const summary = job.summary;
       if (!summary) {
@@ -399,6 +402,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
       return { label: "실패", tone: "failed", text: "리뷰 중 오류가 났습니다. 같은 주소로 다시 요청할 수 있습니다." };
     }
+    // 갱신 시각을 방금, 분, 시간, 또는 날짜로 보여 준다.
     function whenText(updatedAt) {
       const parsed = new Date(updatedAt);
       if (Number.isNaN(parsed.getTime())) {
@@ -417,6 +421,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       return parsed.toLocaleString();
     }
 
+    // 같은 Pull Request는 목록의 최신 작업만 남긴다.
     function latestJobs(list) {
       const seen = new Set();
       const latest = [];
@@ -431,17 +436,20 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       return latest;
     }
 
+    // 저장된 댓글 언어를 화면 이름으로 바꾼다.
     function languageText(language) {
       if (language === "en") return "English";
       if (language === "ko") return "한국어";
       return "";
     }
 
+    // 지금 선택된 댓글 언어다. 한국어가 기본이다.
     function selectedLanguage() {
       const chosen = form.querySelector("input[name=language]:checked");
       return chosen && chosen.value === "en" ? "en" : "ko";
     }
 
+    // 고른 언어를 이 브라우저에만 기억한다. 저장이 막혀도 요청은 계속한다.
     function rememberLanguage() {
       try {
         sessionStorage.setItem("review-bot-language", selectedLanguage());
@@ -450,6 +458,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
     }
 
+    // 이전에 고른 댓글 언어를 다시 체크한다.
     function restoreLanguage() {
       let saved = "";
       try {
@@ -464,10 +473,12 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
     }
 
+    // 커밋 SHA는 앞 7자만 보여 준다.
     function shortSha(headSha) {
       return typeof headSha === "string" && /^[0-9a-f]{7,64}$/i.test(headSha) ? headSha.slice(0, 7) : "";
     }
 
+    // 마지막 Pull Request 주소를 이 브라우저에만 기억한다.
     function remember(value) {
       try {
         sessionStorage.setItem("review-bot-url", value);
@@ -476,6 +487,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
     }
 
+    // 기억해 둔 Pull Request 주소를 읽는다. 없으면 빈 문자열이다.
     function remembered() {
       try {
         return sessionStorage.getItem("review-bot-url") || "";
@@ -484,6 +496,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
     }
 
+    // 다시 리뷰는 주소만 채운다. 버튼을 누르기 전에는 분석을 시작하지 않는다.
     function fillRequest(job) {
       const safeName = /^[A-Za-z0-9][A-Za-z0-9_.-]*$/;
       if (!safeName.test(job.owner) || !safeName.test(job.repo) || !Number.isInteger(job.pullNumber)) {
@@ -496,6 +509,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       form.scrollIntoView({ block: "center" });
     }
 
+    // 최근 리뷰 카드를 다시 그린다.
     function render(list) {
       jobs.replaceChildren();
       const items = latestJobs(Array.isArray(list) ? list : []);
@@ -560,6 +574,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       jobs.append(board);
     }
 
+    // 리뷰 요청 결과 배너를 보여 준다. 주소가 안전할 때만 링크를 붙인다.
     function showResult(message, href, tone) {
       result.className = tone === "error" ? "banner error" : "banner";
       result.replaceChildren();
@@ -575,6 +590,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
 
     let lastJobs = "";
 
+    // 로그인한 사용자의 최근 작업을 가져와 카드로 그린다.
     async function loadJobs() {
       const response = await fetch("/console/jobs");
       if (response.status === 401) {
@@ -643,6 +659,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
     let polling = false;
     let pollTimer = 0;
 
+    // 가입과 로그인 결과 배너를 보여 준다.
     function showAccount(message, tone) {
       accountResult.className = tone === "error" ? "banner error" : "banner";
       accountResult.textContent = message;
@@ -671,6 +688,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
 
     const signupTab = document.querySelector("#show-signup");
     const loginTab = document.querySelector("#show-login");
+    // 회원가입과 로그인 중 고른 탭만 보여 준다.
     function showAuthTab(name) {
       const signup = name !== "login";
       signupForm.hidden = !signup;
@@ -703,6 +721,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       });
     }
 
+    // 로그아웃하면 작업 목록 자동 갱신을 멈춘다.
     function stopPolling() {
       if (pollTimer !== 0) {
         clearInterval(pollTimer);
@@ -711,6 +730,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       polling = false;
     }
 
+    // 작업 화면을 닫고 로그인 탭으로 돌아간다. 회사 등록 여부는 다시 묻는다.
     function leaveWorkspace(message) {
       stopPolling();
       workspace.hidden = true;
@@ -740,6 +760,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }).catch(() => undefined);
     }
 
+    // 예전 사용자처럼 가입 구분이 없을 때 쓸 역할 이름이다.
     function roleText(role) {
       return role === "admin" ? "관리자" : "구성원";
     }
@@ -755,6 +776,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       return roleText(role);
     }
 
+    // 회사 이름, 사업자 정보, 초대 코드, 구성원 목록을 채운다. 사원에게는 초대 코드를 주지 않는다.
     async function loadCompany() {
       const response = await fetch("/account/company");
       if (!response.ok) {
@@ -798,6 +820,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
     }
 
+    // 로그인된 작업 화면으로 바꾸고 회사 정보와 최근 리뷰를 불러온다.
     function enterWorkspace(user) {
       accountPanel.hidden = true;
       workspace.hidden = false;
@@ -814,6 +837,7 @@ export const CONSOLE_PAGE = `<!DOCTYPE html>
       }
     }
 
+    // 가입 또는 로그인을 보내고, 성공하면 작업 화면으로 들어간다.
     async function submitAccount(path, accountForm) {
       const username = accountForm.username.value.trim();
       const password = accountForm.password.value;

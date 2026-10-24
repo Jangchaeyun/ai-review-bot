@@ -5,6 +5,7 @@ import type { ZodError } from "zod";
 import { envSchema, type Env } from "../schemas/env.schema.js";
 import { AppError } from "../utils/app-error.js";
 
+/** 어떤 키가 잘못됐는지만 적는다. 입력된 환경변수 값은 문장에 넣지 않는다. */
 function formatEnvIssues(error: ZodError): string {
   return error.issues
     .map((issue) => {
@@ -14,6 +15,7 @@ function formatEnvIssues(error: ZodError): string {
     .join("; ");
 }
 
+/** 알려진 키만 Env로 좁힌다. 빠지거나 형식이 틀리면 프로세스가 시작할 수 없게 던진다. */
 export function parseEnv(source: NodeJS.ProcessEnv): Env {
   const parsed = envSchema.safeParse({
     NODE_ENV: source["NODE_ENV"],

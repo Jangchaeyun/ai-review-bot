@@ -3,6 +3,7 @@ import { Router } from "express";
 import { createAccountController, type AccountControllerDeps } from "../controllers/account.controller.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
+/** 가입, 로그인, 회사, 사원 정보 경로를 컨트롤러에 연결한다. */
 export function createAccountRouter(deps: AccountControllerDeps): Router {
   const controller = createAccountController(deps);
   const router = Router();

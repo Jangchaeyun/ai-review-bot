@@ -6,6 +6,7 @@ import type { NextFunction, Request, Response } from "express";
 
 type AsyncRequestHandler = (req: Request, res: Response, next: NextFunction) => Promise<void> | void;
 
+/** 비동기 핸들러의 거부를 next로 넘겨 오류 미들웨어가 응답하게 한다. */
 export function asyncHandler(handler: AsyncRequestHandler) {
   return (req: Request, res: Response, next: NextFunction): void => {
     Promise.resolve(handler(req, res, next)).catch(next);

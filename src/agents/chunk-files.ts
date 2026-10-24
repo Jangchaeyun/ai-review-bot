@@ -4,6 +4,7 @@
  */
 import type { ReviewFile } from "./filter-findings.js";
 
+/** 글자 수 예산 안의 파일들을 한 호출로 묶고, 넘치면 다음 청크로 넘긴다. */
 export function chunkReviewFiles(files: readonly ReviewFile[], maxChars: number): ReviewFile[][] {
   const chunks: ReviewFile[][] = [];
   let current: ReviewFile[] = [];

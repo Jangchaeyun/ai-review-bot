@@ -21,6 +21,7 @@ function readEnv(): Env {
   }
 }
 
+/** 앱을 열고 종료 신호에서는 서버와 리뷰 상태 파일을 닫은 뒤 프로세스를 끝낸다. */
 function main(): void {
   const env = readEnv();
   const logger = createLogger(env);

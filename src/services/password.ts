@@ -9,6 +9,7 @@ const SCRYPT_P = 1;
 const SCRYPT_KEY_LENGTH = 32;
 const SALT_BYTES = 16;
 
+/** scrypt 콜백을 Promise로 감싼다. 파라미터는 이 파일의 고정값만 쓴다. */
 function scryptKey(password: string, salt: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     scrypt(password, salt, SCRYPT_KEY_LENGTH, {
@@ -26,12 +27,14 @@ function scryptKey(password: string, salt: Buffer): Promise<Buffer> {
   });
 }
 
+/** 비밀번호 원문 대신 저장할 scrypt 문자열을 만든다. 소금은 호출마다 새로 뽑는다. */
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(SALT_BYTES);
   const key = await scryptKey(password, salt);
   return `scrypt$${SCRYPT_N}$${SCRYPT_R}$${SCRYPT_P}$${salt.toString("base64url")}$${key.toString("base64url")}`;
 }
 
+/** 저장된 scrypt 형식과 파라미터가 맞을 때만 같은 길이의 키를 비교한다. */
 export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split("$");
   if (parts.length !== 6 || parts[0] !== "scrypt") {

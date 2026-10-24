@@ -1,5 +1,5 @@
 /**
- * 딜리버리 키, 게시 키, 작업 큐를 한 SQLite 파일에 남긴다.
+ * 딜리버리 키, 게시 키, 작업 큐, 회사, 사용자, 세션을 한 SQLite 파일에 남긴다.
  * 이 파일은 프로세스 하나에서만 연다. 인스턴스가 둘 이상이면 공유 저장소가 따로 필요하다.
  */
 import { mkdirSync } from "node:fs";
@@ -66,6 +66,7 @@ export type ReviewState = {
   close(): void;
 };
 
+/** 리뷰 상태 파일과 그 안의 계정 저장소를 연다. memory가 아닌 경로만 이 함수를 탄다. */
 export function openReviewState(path: string, options?: { now?: () => number; deliveryTtlMs?: number }): ReviewState {
   if (path !== ":memory:") {
     mkdirSync(dirname(path), { recursive: true });

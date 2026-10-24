@@ -3,6 +3,7 @@ import { Router } from "express";
 import { createConsoleController, type ConsoleControllerDeps } from "../controllers/console.controller.js";
 import { asyncHandler } from "../utils/async-handler.js";
 
+/** 루트 페이지, 작업 목록, 수동 리뷰 요청을 연결한다. */
 export function createConsoleRouter(deps: ConsoleControllerDeps): Router {
   const controller = createConsoleController(deps);
   const router = Router();

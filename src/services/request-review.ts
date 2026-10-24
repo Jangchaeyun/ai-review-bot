@@ -49,6 +49,7 @@ export type RequestReviewDeps = {
   now?: () => number;
 };
 
+/** GitHub 응답의 HTTP 상태다. 없는 오류는 재시도 분류에 쓰지 않는다. */
 function statusOf(error: unknown): number | undefined {
   if (typeof error !== "object" || error === null || !("status" in error)) {
     return undefined;
@@ -56,6 +57,7 @@ function statusOf(error: unknown): number | undefined {
   return typeof error.status === "number" ? error.status : undefined;
 }
 
+/** 저장소 조회 실패를 앱 오류로 나눈다. 인증 실패와 없는 저장소는 재시도하지 않는다. */
 function githubError(error: unknown, notFound: AppError): AppError {
   if (error instanceof AppError) {
     return error;
@@ -89,6 +91,7 @@ function githubError(error: unknown, notFound: AppError): AppError {
   });
 }
 
+/** 콘솔 주소로 PR을 찾아 큐에 넣는다. 요청한 사용자 이름은 콘솔 요청에만 남긴다. */
 export function createRequestReview(deps: RequestReviewDeps): (pullRequestUrl: string, language?: ReviewLanguage, requestedBy?: string) => Promise<ReviewJobRecord> {
   const privateKey = normalizePrivateKey(deps.env.GITHUB_APP_PRIVATE_KEY);
   const fetchImpl = createGithubFetch({

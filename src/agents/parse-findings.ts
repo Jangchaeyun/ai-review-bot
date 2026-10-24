@@ -11,12 +11,14 @@ export type ParsedFindings = {
   droppedCount: number;
 };
 
+/** 코드 펜스를 벗기고 안의 JSON 문자열만 남긴다. */
 function unwrapJson(content: string): string {
   const trimmed = content.trim();
   const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/.exec(trimmed);
   return fenced?.[1] ?? trimmed;
 }
 
+/** 모델 출력에서 스키마를 통과한 발견만 남긴다. 요청한 카테고리가 아니면 버린다. */
 export function parseFindings(content: string, category: FindingCategory): ParsedFindings {
   let parsed: unknown;
   try {

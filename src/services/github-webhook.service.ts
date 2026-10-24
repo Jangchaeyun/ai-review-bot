@@ -41,11 +41,13 @@ export type GithubWebhookResult = {
 
 const SAFE_TOKEN = /^[a-z0-9_]{1,64}$/;
 
+/** application/json만 Webhook 본문으로 받는다. */
 function isJsonContentType(contentType: string | undefined): boolean {
   const mediaType = contentType?.split(";")[0]?.trim().toLowerCase();
   return mediaType === "application/json";
 }
 
+/** 서명 검증이 끝난 raw body를 JSON으로 읽는다. 파싱 실패는 스키마 단계로 넘기지 않는다. */
 function parseJson(rawBody: Buffer): unknown | undefined {
   try {
     const value: unknown = JSON.parse(rawBody.toString("utf8"));
@@ -55,6 +57,7 @@ function parseJson(rawBody: Buffer): unknown | undefined {
   }
 }
 
+/** Webhook 오류 응답 형식이다. 본문 원문은 넣지 않는다. */
 function errorBody(path: string, code: string, message: string): ErrorResponse {
   return errorResponseSchema.parse({
     error: {
@@ -65,6 +68,7 @@ function errorBody(path: string, code: string, message: string): ErrorResponse {
   });
 }
 
+/** 받은 이벤트 결과만 로그한다. 이벤트 이름이 토큰 형식이 아니면 로그에서 뺀다. */
 function logWebhook(
   logger: Logger,
   fields: {
@@ -97,11 +101,13 @@ function logWebhook(
   );
 }
 
+/** 로그에 남길 딜리버리 아이디는 UUID일 때만 쓴다. */
 function safeDeliveryId(deliveryId: string | undefined): string | undefined {
   const parsed = deliveryIdSchema.safeParse(deliveryId);
   return parsed.success ? parsed.data : undefined;
 }
 
+/** 서명을 확인하고, 받을 pull_request만 중복 저장 뒤 큐에 넣는다. */
 export function receiveGithubWebhook(deps: GithubWebhookDeps, input: GithubWebhookInput): GithubWebhookResult {
   const loggedDeliveryId = safeDeliveryId(input.deliveryId);
 

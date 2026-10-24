@@ -10,6 +10,7 @@ export type FileDiffIndex = {
 
 const HUNK_HEADER = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 
+/** 추가된 줄과 문맥 줄만 새 파일 줄 번호로 인덱싱한다. 삭제된 줄은 번호에 넣지 않는다. */
 export function indexPatch(path: string, patch: string): FileDiffIndex {
   const lines = new Map<number, string>();
   const hunkText: string[] = [];
@@ -68,6 +69,7 @@ export function numberedNewFileLines(patch: string): string {
     .join("\n");
 }
 
+/** 근거 문자열이 새 파일 쪽 hunk 안에 실제로 있는지 본다. */
 export function evidenceInDiff(evidence: string, index: FileDiffIndex): boolean {
   const needle = evidence.replace(/\r\n/g, "\n").trim();
   if (needle.length < 6) {
@@ -76,6 +78,7 @@ export function evidenceInDiff(evidence: string, index: FileDiffIndex): boolean 
   return index.hunkText.some((hunk) => hunk.includes(needle));
 }
 
+/** 시작과 끝 줄이 모두 diff에 있고, 범위가 50줄을 넘지 않는지 본다. */
 export function lineRangeInDiff(lineStart: number, lineEnd: number, index: FileDiffIndex): boolean {
   if (lineStart > lineEnd || lineEnd - lineStart > 50) {
     return false;
@@ -88,6 +91,7 @@ export function lineRangeInDiff(lineStart: number, lineEnd: number, index: FileD
   return true;
 }
 
+/** 주석, 빈 줄, 괄호, 함수 선언처럼 지적의 본문이 아닌 줄인지 본다. */
 function isDecorationLine(text: string): boolean {
   const trimmed = text.trim();
   if (trimmed.length === 0 || trimmed === "{" || trimmed === "}" || trimmed === "};") {

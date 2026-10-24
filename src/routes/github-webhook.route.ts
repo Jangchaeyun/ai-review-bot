@@ -6,6 +6,7 @@ import express, { Router } from "express";
 import { createGithubWebhookController } from "../controllers/github-webhook.controller.js";
 import type { GithubWebhookDeps } from "../services/github-webhook.service.js";
 
+/** 이 라우터의 POST만 raw body를 보존한다. */
 export function createGithubWebhookRouter(deps: GithubWebhookDeps): Router {
   const router = Router();
   router.post(

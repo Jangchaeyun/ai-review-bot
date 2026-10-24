@@ -34,6 +34,7 @@ export type ReviewPipelineDeps = {
   onFinished?: (deliveryId: string, summary: ReviewSummary) => void;
 };
 
+/** 한 작업을 PR 조회, 에이전트 분석, 리뷰 게시까지 이어 실행한다. */
 export function createReviewPipeline(deps: ReviewPipelineDeps): ReviewJobHandler {
   const now = deps.now ?? Date.now;
 
@@ -119,6 +120,7 @@ export function createReviewPipeline(deps: ReviewPipelineDeps): ReviewJobHandler
   };
 }
 
+/** 처리 시간, 토큰 사용량, 누적 실패율을 한 로그로 남긴다. diff와 비밀은 넣지 않는다. */
 function logFinished(
   deps: ReviewPipelineDeps,
   job: ReviewJob,
@@ -171,6 +173,7 @@ export type ReviewRuntime = {
   close(): Promise<void>;
 };
 
+/** 환경에 맞는 큐, 계정, 리뷰 요청을 묶어 프로세스가 쓸 런타임을 만든다. */
 export function createReviewRuntime(deps: ReviewRuntimeDeps): ReviewRuntime {
   const metrics = deps.metrics ?? new InMemoryReviewMetrics();
   const sleep = deps.sleep ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));

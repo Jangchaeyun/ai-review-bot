@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { receiveGithubWebhook, type GithubWebhookDeps } from "../services/github-webhook.service.js";
 import { requestPath } from "../utils/request-path.js";
 
+/** 헤더와 raw body만 모아 서비스에 넘기고, 그 상태 코드를 그대로 응답한다. */
 export function createGithubWebhookController(deps: GithubWebhookDeps) {
   return function githubWebhookController(req: Request, res: Response): void {
     const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0);
